@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Plan | Strava Style</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">STRAVA <span>PLAN</span></div>
+    </nav>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="profile-card">
+                <div class="avatar-placeholder">PB</div>
+                <div class="profile-name">Pierre Beret</div>
+                <div class="profile-stat">Sub-37 10k Goal</div>
+            </div>
+
+            <div class="week-nav">
+                <button id="prevWeek" class="nav-btn">
+                    <span>Previous Week</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <button id="nextWeek" class="nav-btn">
+                    <span>Next Week</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </aside>
+
+        <main class="feed">
+            <div class="feed-header">
+                <h2 id="currentWeekLabel" class="feed-title">Week 1</h2>
+                <p id="weekSummary" class="feed-subtitle">Focus: Base Building</p>
+            </div>
+
+            <div id="scheduleGrid" class="feed-list">
+                <!-- Activities injected here -->
+            </div>
+        </main>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+
+</html>
