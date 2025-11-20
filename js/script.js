@@ -1,41 +1,41 @@
 const trainingPlan = [
     {
         week: 1,
-        focus: "Semaine 5 km (20 → 23 novembre)",
+        focus: "Semaine 5 km - Fun & Technique",
         days: [
             { day: "Mon", date: "17/11", type: "Rest", title: "-", details: "" },
             { day: "Tue", date: "18/11", type: "Rest", title: "-", details: "" },
             { day: "Wed", date: "19/11", type: "Rest", title: "-", details: "" },
-            { day: "Thu", date: "20/11", type: "Speed", title: "Activation 5 km", details: "20’ EF + 2×6’ @ 3’50/km (r=3’) + 10’ RC" },
-            { day: "Fri", date: "21/11", type: "Rest", title: "Repos", details: "Repos complet." },
-            { day: "Sat", date: "22/11", type: "Easy", title: "Footing léger", details: "20–25’ @ 5’00/km + 2 lignes droites." },
-            { day: "Sun", date: "23/11", type: "Race", title: "Course 5 km (Ni Rose)", details: "Objectif 3’33–3’36/km (17’45–18’00)." }
+            { day: "Thu", date: "20/11", type: "Speed", title: "Technique & Strides", details: "15’ Easy Jog + 4x Strides (Run tall and relaxed)." },
+            { day: "Fri", date: "21/11", type: "Rest", title: "Rest", details: "Rest or play other sports." },
+            { day: "Sat", date: "22/11", type: "Easy", title: "Shakeout", details: "15’ Easy run + Stretching." },
+            { day: "Sun", date: "23/11", type: "Race", title: "5 km Race", details: "Run by feel. Start steady, finish with a smile!" }
         ]
     },
     {
         week: 2,
-        focus: "Semaine 10 km cool (24 → 30 novembre)",
+        focus: "Training Week - Speed Games",
         days: [
-            { day: "Mon", date: "24/11", type: "Easy", title: "Footing EF", details: "45–50’ @ 4’50–5’00/km." },
-            { day: "Tue", date: "25/11", type: "Speed", title: "VMA longue", details: "4×1000 m @ 3’36–3’38 (r=1’30–1’40) + échauffement / retour au calme." },
-            { day: "Wed", date: "26/11", type: "Easy", title: "Footing EF", details: "40’ @ 5’00/km." },
-            { day: "Thu", date: "27/11", type: "Tempo", title: "AS10 « cool »", details: "2×10’ @ 4’15–4’20/km." },
-            { day: "Fri", date: "28/11", type: "Rest", title: "Repos", details: "Repos complet." },
-            { day: "Sat", date: "29/11", type: "Rest", title: "Repos / Footing", details: "Repos recommandé. Option : 20’ très facile si bonnes sensations." },
-            { day: "Sun", date: "30/11", type: "Race", title: "10 km cool", details: "Objectif 43–44 min (4’18–4’22/km)." }
+            { day: "Mon", date: "24/11", type: "Easy", title: "Easy Run", details: "30’ Jog. Chatty pace." },
+            { day: "Tue", date: "25/11", type: "Speed", title: "Speed Games", details: "8x Short Hill Sprints (30s) OR 200m Relays. Walk back recovery." },
+            { day: "Wed", date: "26/11", type: "Rest", title: "Rest", details: "Rest day." },
+            { day: "Thu", date: "27/11", type: "Tempo", title: "Steady Running", details: "3x 4’ Steady pace (not hard). 2’ Walk/Jog rest." },
+            { day: "Fri", date: "28/11", type: "Rest", title: "Rest", details: "Rest." },
+            { day: "Sat", date: "29/11", type: "Rest", title: "Active Fun", details: "Bike ride, swim, or hike." },
+            { day: "Sun", date: "30/11", type: "Long", title: "Long Run", details: "8 km Run/Walk. Take breaks if needed." }
         ]
     },
     {
         week: 3,
-        focus: "Semaine d’affûtage 10 km (1 → 7 décembre)",
+        focus: "Race Week - 10km Challenge",
         days: [
-            { day: "Mon", date: "01/12", type: "Easy", title: "Footing EF", details: "45’ @ 4’50/km." },
-            { day: "Tue", date: "02/12", type: "Speed", title: "Tonicité", details: "8×300 m @ 3’20/km (r=1’10–1’15) + échauffement / retour au calme." },
-            { day: "Wed", date: "03/12", type: "Easy", title: "Footing EF", details: "35–40’ @ 5’00/km." },
-            { day: "Thu", date: "04/12", type: "Tempo", title: "AS10 courte", details: "2×6’ @ 3’45/km (r=3’)." },
-            { day: "Fri", date: "05/12", type: "Rest", title: "Repos total", details: "Repos complet, focus fraîcheur." },
-            { day: "Sat", date: "06/12", type: "Easy", title: "Footing très léger", details: "20’ + 2 lignes droites, très facile." },
-            { day: "Sun", date: "07/12", type: "Race", title: "10 km objectif", details: "Objectif 3’44–3’47/km (37’20–38’00)." }
+            { day: "Mon", date: "01/12", type: "Easy", title: "Easy Run", details: "25’ Easy Jog." },
+            { day: "Tue", date: "02/12", type: "Speed", title: "Fast Feet", details: "5x 100m Fast (not sprint). Focus on turnover." },
+            { day: "Wed", date: "03/12", type: "Rest", title: "Rest", details: "Rest." },
+            { day: "Thu", date: "04/12", type: "Easy", title: "Short Run", details: "20’ Easy + 2 Strides." },
+            { day: "Fri", date: "05/12", type: "Rest", title: "Rest", details: "Rest & Hydrate." },
+            { day: "Sat", date: "06/12", type: "Easy", title: "Shakeout", details: "10’ Jog + Stretching." },
+            { day: "Sun", date: "07/12", type: "Race", title: "10 km Challenge", details: "Goal: Finish Strong. Pacing: 45-50 mins (approx)." }
         ]
     }
 ];
@@ -104,12 +104,8 @@ function renderWeek(weekIndex) {
                             <span class="stat-value">${day.type}</span>
                         </div>
                         <div class="stat-box">
-                            <span class="stat-label">Distance</span>
-                            <span class="stat-value">-- km</span>
-                        </div>
-                         <div class="stat-box">
-                            <span class="stat-label">Pace</span>
-                            <span class="stat-value">-- /km</span>
+                            <span class="stat-label">Focus</span>
+                            <span class="stat-value">Fun/Tech</span>
                         </div>
                     </div>
                     ` : ''}
