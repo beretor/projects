@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur Vélo</title>
+    <meta name="description"
+        content="Calculez votre taille de cadre et votre pression de pneus idéale pour votre vélo.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="background-effects">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <main class="container">
+        <header class="header">
+            <div class="logo">
+                <svg class="bike-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                    <circle cx="5.5" cy="17.5" r="3.5" />
+                    <circle cx="18.5" cy="17.5" r="3.5" />
+                    <path d="M15 6h2.5l2 4M5.5 17.5l4-7h4l3.5 7M13.5 10.5l-2 7" />
+                    <circle cx="15" cy="6" r="1" />
+                </svg>
+                <h1>Calculateur <span class="highlight">Vélo</span></h1>
+            </div>
+            <p class="tagline">Outils de précision pour cyclistes exigeants</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="frame-size">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 21H3M21 21V3M3 21V12M12 21V6" />
+                </svg>
+                Taille de Cadre
+            </button>
+            <button class="tab-btn" data-tab="tire-pressure">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="9" />
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 3v2M12 19v2M3 12h2M19 12h2" />
+                </svg>
+                Pression Pneus
+            </button>
+        </nav>
+
+        <!-- Frame Size Calculator Tab -->
+        <div class="tab-content active" id="frame-size">
+            <div class="calculator-grid">
+                <section class="card input-card">
+                    <h2 class="card-title">
+                        Vos Mensurations
+                    </h2>
+
+                    <div class="form-group">
+                        <label for="height">Taille</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="height" placeholder="175" min="100" max="250">
+                            <span class="unit">cm</span>
+                        </div>
+                        <span class="helper-text">Debout, pieds nus, dos contre un mur</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inseam">Entrejambe</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="inseam" placeholder="82" min="50" max="120">
+                            <span class="unit">cm</span>
+                        </div>
+                        <span class="helper-text">Intérieur de la jambe, du sol à l'entrejambe</span>
+                    </div>
+                </section>
+
+                <section class="card bike-type-card">
+                    <h2 class="card-title">
+                        Type de Vélo
+                    </h2>
+
+                    <div class="bike-type-grid">
+                        <button class="bike-type-btn active" data-type="road">
+                            <svg viewBox="0 0 64 64" class="bike-type-icon">
+                                <circle cx="16" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <circle cx="48" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <path d="M16 44L28 24H38L48 44M28 24L24 44M38 24L48 44" stroke="currentColor"
+                                    stroke-width="2" fill="none" />
+                                <path d="M38 24C42 20 46 20 46 20" stroke="currentColor" stroke-width="2" fill="none" />
+                            </svg>
+                            <span>Route</span>
+                        </button>
+
+                        <button class="bike-type-btn" data-type="tt">
+                            <svg viewBox="0 0 64 64" class="bike-type-icon">
+                                <circle cx="16" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <circle cx="48" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <path d="M16 44L30 28H40L48 44M30 28L26 44M40 28L48 44" stroke="currentColor"
+                                    stroke-width="2" fill="none" />
+                                <path d="M30 28H22V24H30" stroke="currentColor" stroke-width="2" fill="none" />
+                            </svg>
+                            <span>CLM</span>
+                        </button>
+
+                        <button class="bike-type-btn" data-type="mountain">
+                            <svg viewBox="0 0 64 64" class="bike-type-icon">
+                                <circle cx="16" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <circle cx="48" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <path d="M16 44L26 26H36L48 44M26 26L22 44M36 26L48 44" stroke="currentColor"
+                                    stroke-width="2" fill="none" />
+                                <path d="M26 26V18M26 22H22M26 22H30" stroke="currentColor" stroke-width="2"
+                                    fill="none" />
+                            </svg>
+                            <span>VTT</span>
+                        </button>
+
+                        <button class="bike-type-btn" data-type="gravel">
+                            <svg viewBox="0 0 64 64" class="bike-type-icon">
+                                <circle cx="16" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <circle cx="48" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <path d="M16 44L28 26H38L48 44M28 26L24 44M38 26L48 44" stroke="currentColor"
+                                    stroke-width="2" fill="none" />
+                                <path d="M38 26C42 22 46 22 46 22" stroke="currentColor" stroke-width="2" fill="none" />
+                                <circle cx="16" cy="44" r="6" stroke="currentColor" stroke-width="1"
+                                    stroke-dasharray="2 2" fill="none" />
+                                <circle cx="48" cy="44" r="6" stroke="currentColor" stroke-width="1"
+                                    stroke-dasharray="2 2" fill="none" />
+                            </svg>
+                            <span>Gravel</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="card proficiency-card">
+                    <h2 class="card-title">
+                        Niveau de Pratique
+                    </h2>
+
+                    <div class="proficiency-options">
+                        <label class="proficiency-option">
+                            <input type="radio" name="proficiency" value="beginner" checked>
+                            <div class="option-content">
+                                <span class="option-title">Débutant</span>
+                                <span class="option-desc">Position confortable et droite</span>
+                            </div>
+                        </label>
+
+                        <label class="proficiency-option">
+                            <input type="radio" name="proficiency" value="intermediate">
+                            <div class="option-content">
+                                <span class="option-title">Intermédiaire</span>
+                                <span class="option-desc">Équilibre confort & performance</span>
+                            </div>
+                        </label>
+
+                        <label class="proficiency-option">
+                            <input type="radio" name="proficiency" value="advanced">
+                            <div class="option-content">
+                                <span class="option-title">Confirmé</span>
+                                <span class="option-desc">Position agressive, géométrie course</span>
+                            </div>
+                        </label>
+                    </div>
+                </section>
+
+                <section class="card geometry-card">
+                    <h2 class="card-title">
+                        Géométrie du Cadre
+                    </h2>
+
+                    <div class="geometry-diagram">
+                        <svg viewBox="0 0 400 280" class="bike-geometry-svg">
+                            <g class="frame-lines" stroke="#1a1a1a" stroke-width="2" fill="none">
+                                <circle cx="160" cy="200" r="4" fill="#1a1a1a" />
+                                <circle cx="60" cy="200" r="45" stroke="#ccc" stroke-width="1.5" />
+                                <circle cx="60" cy="200" r="3" fill="#1a1a1a" />
+                                <circle cx="320" cy="200" r="45" stroke="#ccc" stroke-width="1.5" />
+                                <circle cx="320" cy="200" r="3" fill="#1a1a1a" />
+                                <line x1="60" y1="200" x2="160" y2="200" />
+                                <line x1="60" y1="200" x2="160" y2="100" />
+                                <line x1="160" y1="200" x2="160" y2="80" stroke="#e91e63" stroke-width="3" />
+                                <line x1="160" y1="100" x2="280" y2="100" />
+                                <line x1="160" y1="200" x2="280" y2="130" />
+                                <line x1="280" y1="100" x2="290" y2="150" stroke-width="2.5" />
+                                <line x1="290" y1="150" x2="320" y2="200" stroke="#999" stroke-width="1.5" />
+                                <line x1="280" y1="95" x2="300" y2="85" />
+                                <path d="M295 85 Q310 80 310 95" stroke-width="1.5" />
+                                <ellipse cx="160" cy="72" rx="25" ry="6" fill="#1a1a1a" />
+                                <line x1="160" y1="78" x2="160" y2="80" stroke-width="3" />
+                            </g>
+                            <g class="measurement stack-measure">
+                                <line x1="285" y1="200" x2="285" y2="95" stroke="#e91e63" stroke-width="1.5"
+                                    stroke-dasharray="4 2" />
+                                <line x1="280" y1="200" x2="290" y2="200" stroke="#e91e63" stroke-width="1.5" />
+                                <line x1="280" y1="95" x2="290" y2="95" stroke="#e91e63" stroke-width="1.5" />
+                                <text x="295" y="150" fill="#e91e63" font-size="11" font-weight="600">STACK</text>
+                            </g>
+                            <g class="measurement reach-measure">
+                                <line x1="160" y1="85" x2="280" y2="85" stroke="#1a1a1a" stroke-width="1.5"
+                                    stroke-dasharray="4 2" />
+                                <line x1="160" y1="80" x2="160" y2="90" stroke="#1a1a1a" stroke-width="1.5" />
+                                <line x1="280" y1="80" x2="280" y2="90" stroke="#1a1a1a" stroke-width="1.5" />
+                                <text x="200" y="78" fill="#1a1a1a" font-size="11" font-weight="600">REACH</text>
+                            </g>
+                            <g class="measurement seat-tube-label">
+                                <text x="120" y="150" fill="#e91e63" font-size="10" font-weight="500"
+                                    transform="rotate(-90, 120, 150)">TUBE DE SELLE</text>
+                            </g>
+                            <g class="measurement wheelbase-measure">
+                                <line x1="60" y1="255" x2="320" y2="255" stroke="#666" stroke-width="1"
+                                    stroke-dasharray="3 2" />
+                                <line x1="60" y1="250" x2="60" y2="260" stroke="#666" stroke-width="1" />
+                                <line x1="320" y1="250" x2="320" y2="260" stroke="#666" stroke-width="1" />
+                                <text x="165" y="268" fill="#666" font-size="10" font-weight="500">EMPATTEMENT</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="geometry-legend">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #e91e63;"></span>
+                            <span class="legend-text"><strong>Stack</strong> — Hauteur verticale du cadre</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #1a1a1a;"></span>
+                            <span class="legend-text"><strong>Reach</strong> — Longueur horizontale du cadre</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #e91e63;"></span>
+                            <span class="legend-text"><strong>Tube de selle</strong> — Détermine la taille du
+                                cadre</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card results-card" id="results">
+                    <h2 class="card-title">
+                        Taille Recommandée
+                    </h2>
+
+                    <div class="results-placeholder" id="resultsPlaceholder">
+                        <p>Entrez vos mensurations pour découvrir votre taille de cadre idéale</p>
+                    </div>
+
+                    <div class="results-content hidden" id="resultsContent">
+                        <div class="size-display">
+                            <div class="primary-size">
+                                <span class="size-value" id="frameSize">--</span>
+                                <span class="size-unit">cm</span>
+                            </div>
+                            <div class="size-letter" id="sizeLetter">--</div>
+                        </div>
+
+                        <div class="size-range">
+                            <span class="range-label">Plage recommandée :</span>
+                            <span class="range-value" id="sizeRange">-- à -- cm</span>
+                        </div>
+
+                        <div class="fit-tips" id="fitTips">
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <button class="calculate-btn" id="calculateBtn">
+                <span>Calculer Ma Taille</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </button>
+
+            <footer class="footer">
+                <p>💡 <strong>Conseil :</strong> Le calcul de la taille de cadre est un point de départ. Pour un
+                    ajustement optimal, consultez un professionnel.</p>
+            </footer>
+        </div>
+
+        <!-- Tire Pressure Calculator Tab -->
+        <div class="tab-content" id="tire-pressure">
+            <div class="calculator-grid">
+                <section class="card input-card">
+                    <h2 class="card-title">
+                        Poids Total
+                    </h2>
+
+                    <div class="form-group">
+                        <label for="riderWeight">Poids du Cycliste (nu)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="riderWeight" placeholder="70" min="40" max="150">
+                            <span class="unit">kg</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clothingWeight">Équipement vestimentaire</label>
+                        <div class="weight-examples">
+                            <button class="example-btn" data-weight="1" data-target="clothingWeight">
+                                <span class="example-icon">☀️</span>
+                                <span class="example-label">Été</span>
+                                <span class="example-value">~1 kg</span>
+                            </button>
+                            <button class="example-btn" data-weight="2.5" data-target="clothingWeight">
+                                <span class="example-icon">🍂</span>
+                                <span class="example-label">Mi-saison</span>
+                                <span class="example-value">~2.5 kg</span>
+                            </button>
+                            <button class="example-btn" data-weight="4" data-target="clothingWeight">
+                                <span class="example-icon">❄️</span>
+                                <span class="example-label">Hiver</span>
+                                <span class="example-value">~4 kg</span>
+                            </button>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="number" id="clothingWeight" placeholder="1.5" min="0" max="10" step="0.5"
+                                value="1.5">
+                            <span class="unit">kg</span>
+                        </div>
+                        <span class="helper-text">Maillot, cuissard, chaussures, casque, gants, lunettes...</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bikeWeight">Poids du Vélo</label>
+                        <div class="weight-examples">
+                            <button class="example-btn" data-weight="6.8" data-target="bikeWeight">
+                                <span class="example-icon">🏆</span>
+                                <span class="example-label">Route Pro</span>
+                                <span class="example-value">6.8 kg</span>
+                            </button>
+                            <button class="example-btn" data-weight="8" data-target="bikeWeight">
+                                <span class="example-icon">🚴</span>
+                                <span class="example-label">Route</span>
+                                <span class="example-value">8 kg</span>
+                            </button>
+                            <button class="example-btn" data-weight="9.5" data-target="bikeWeight">
+                                <span class="example-icon">🌲</span>
+                                <span class="example-label">Gravel</span>
+                                <span class="example-value">9.5 kg</span>
+                            </button>
+                            <button class="example-btn" data-weight="13" data-target="bikeWeight">
+                                <span class="example-icon">🏔️</span>
+                                <span class="example-label">VTT</span>
+                                <span class="example-value">13 kg</span>
+                            </button>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="number" id="bikeWeight" placeholder="8" min="4" max="25" step="0.1" value="8">
+                            <span class="unit">kg</span>
+                        </div>
+                        <span class="helper-text">Avec accessoires (bidons, sacoches, compteur...)</span>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2 class="card-title">
+                        Type de Vélo
+                    </h2>
+
+                    <div class="bike-type-grid">
+                        <button class="bike-type-btn-pressure active" data-type="road">
+                            <svg viewBox="0 0 64 64" class="bike-type-icon">
+                                <circle cx="16" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <circle cx="48" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <path d="M16 44L28 24H38L48 44M28 24L24 44M38 24L48 44" stroke="currentColor"
+                                    stroke-width="2" fill="none" />
+                                <path d="M38 24C42 20 46 20 46 20" stroke="currentColor" stroke-width="2" fill="none" />
+                            </svg>
+                            <span>Route</span>
+                        </button>
+
+                        <button class="bike-type-btn-pressure" data-type="gravel">
+                            <svg viewBox="0 0 64 64" class="bike-type-icon">
+                                <circle cx="16" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <circle cx="48" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <path d="M16 44L28 26H38L48 44M28 26L24 44M38 26L48 44" stroke="currentColor"
+                                    stroke-width="2" fill="none" />
+                                <circle cx="16" cy="44" r="6" stroke="currentColor" stroke-width="1"
+                                    stroke-dasharray="2 2" fill="none" />
+                                <circle cx="48" cy="44" r="6" stroke="currentColor" stroke-width="1"
+                                    stroke-dasharray="2 2" fill="none" />
+                            </svg>
+                            <span>Gravel</span>
+                        </button>
+
+                        <button class="bike-type-btn-pressure" data-type="mtb">
+                            <svg viewBox="0 0 64 64" class="bike-type-icon">
+                                <circle cx="16" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <circle cx="48" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <path d="M16 44L26 26H36L48 44M26 26L22 44M36 26L48 44" stroke="currentColor"
+                                    stroke-width="2" fill="none" />
+                                <path d="M26 26V18M26 22H22M26 22H30" stroke="currentColor" stroke-width="2"
+                                    fill="none" />
+                            </svg>
+                            <span>VTT</span>
+                        </button>
+
+                        <button class="bike-type-btn-pressure" data-type="city">
+                            <svg viewBox="0 0 64 64" class="bike-type-icon">
+                                <circle cx="16" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <circle cx="48" cy="44" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <path d="M16 44L26 28H36L48 44M26 28L22 44M36 28L48 44" stroke="currentColor"
+                                    stroke-width="2" fill="none" />
+                                <line x1="26" y1="28" x2="26" y2="20" stroke="currentColor" stroke-width="2" />
+                                <line x1="22" y1="20" x2="30" y2="20" stroke="currentColor" stroke-width="2" />
+                            </svg>
+                            <span>Ville</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2 class="card-title">
+                        Largeur des Pneus
+                    </h2>
+
+                    <div class="tire-width-dual">
+                        <div class="tire-width-column">
+                            <label class="tire-column-label">🔵 Pneu Avant</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="tireWidthFront" placeholder="28" min="20" max="100" value="28">
+                                <span class="unit">mm</span>
+                            </div>
+                            <div class="mini-presets" data-target="tireWidthFront">
+                                <button class="mini-preset-btn" data-width="25">25</button>
+                                <button class="mini-preset-btn active" data-width="28">28</button>
+                                <button class="mini-preset-btn" data-width="32">32</button>
+                            </div>
+                        </div>
+                        <div class="tire-width-column">
+                            <label class="tire-column-label">🔴 Pneu Arrière</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="tireWidthRear" placeholder="28" min="20" max="100" value="28">
+                                <span class="unit">mm</span>
+                            </div>
+                            <div class="mini-presets" data-target="tireWidthRear">
+                                <button class="mini-preset-btn" data-width="25">25</button>
+                                <button class="mini-preset-btn active" data-width="28">28</button>
+                                <button class="mini-preset-btn" data-width="32">32</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tire-sync-option">
+                        <label class="sync-checkbox">
+                            <input type="checkbox" id="syncTireWidths" checked>
+                            <span>Même largeur avant/arrière</span>
+                        </label>
+                    </div>
+
+                    <div class="tire-presets">
+                        <span class="preset-label">Configurations typiques :</span>
+                        <div class="preset-buttons" id="tirePresetButtons">
+                            <button class="preset-btn" data-front="25" data-rear="25">25/25</button>
+                            <button class="preset-btn active" data-front="28" data-rear="28">28/28</button>
+                            <button class="preset-btn" data-front="28" data-rear="30">28/30</button>
+                            <button class="preset-btn" data-front="32" data-rear="32">32/32</button>
+                            <button class="preset-btn" data-front="40" data-rear="42">40/42</button>
+                        </div>
+                    </div>
+                    <span class="helper-text">Inscrite sur le flanc du pneu (ex: 700x28c = 28mm)</span>
+                </section>
+
+                <section class="card">
+                    <h2 class="card-title">
+                        Type de Pneu & Jante
+                    </h2>
+
+                    <div class="proficiency-options">
+                        <label class="proficiency-option">
+                            <input type="radio" name="tireType" value="clincher" checked>
+                            <div class="option-content">
+                                <span class="option-title">Chambre à Air</span>
+                                <span class="option-desc">Pneu classique avec chambre — jante hooked standard</span>
+                            </div>
+                        </label>
+
+                        <label class="proficiency-option">
+                            <input type="radio" name="tireType" value="tubeless">
+                            <div class="option-content">
+                                <span class="option-title">Tubeless — Jante Hooked</span>
+                                <span class="option-desc">Sans chambre, pression réduite de 5-10%</span>
+                            </div>
+                        </label>
+
+                        <label class="proficiency-option">
+                            <input type="radio" name="tireType" value="tubeless_hookless">
+                            <div class="option-content">
+                                <span class="option-title">Tubeless — Jante Hookless</span>
+                                <span class="option-desc">Sans crochet, pression max limitée (5 bar route)</span>
+                            </div>
+                        </label>
+
+                        <label class="proficiency-option">
+                            <input type="radio" name="tireType" value="tubular">
+                            <div class="option-content">
+                                <span class="option-title">Boyau</span>
+                                <span class="option-desc">Pneu professionnel collé sur jante</span>
+                            </div>
+                        </label>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2 class="card-title">
+                        Conditions de Roulage
+                    </h2>
+
+                    <div class="proficiency-options">
+                        <label class="proficiency-option">
+                            <input type="radio" name="conditions" value="dry" checked>
+                            <div class="option-content">
+                                <span class="option-title">Sec</span>
+                                <span class="option-desc">Routes sèches, conditions optimales</span>
+                            </div>
+                        </label>
+
+                        <label class="proficiency-option">
+                            <input type="radio" name="conditions" value="mixed">
+                            <div class="option-content">
+                                <span class="option-title">Mixte</span>
+                                <span class="option-desc">Routes humides ou surface moyenne</span>
+                            </div>
+                        </label>
+
+                        <label class="proficiency-option">
+                            <input type="radio" name="conditions" value="wet">
+                            <div class="option-content">
+                                <span class="option-title">Mouillé / Tout-terrain</span>
+                                <span class="option-desc">Pluie, gravier, chemins</span>
+                            </div>
+                        </label>
+                    </div>
+                </section>
+
+                <section class="card results-card" id="pressureResults">
+                    <h2 class="card-title">
+                        Pression Recommandée
+                    </h2>
+
+                    <div class="results-placeholder" id="pressurePlaceholder">
+                        <p>Entrez vos paramètres pour calculer la pression idéale</p>
+                    </div>
+
+                    <div class="results-content hidden" id="pressureContent">
+                        <div class="pressure-display">
+                            <div class="pressure-wheel">
+                                <div class="wheel-label">Avant</div>
+                                <div class="pressure-value">
+                                    <span class="pressure-number" id="frontPressure">--</span>
+                                    <span class="pressure-unit">bar</span>
+                                </div>
+                                <div class="pressure-psi" id="frontPressurePsi">-- psi</div>
+                            </div>
+                            <div class="pressure-wheel">
+                                <div class="wheel-label">Arrière</div>
+                                <div class="pressure-value">
+                                    <span class="pressure-number" id="rearPressure">--</span>
+                                    <span class="pressure-unit">bar</span>
+                                </div>
+                                <div class="pressure-psi" id="rearPressurePsi">-- psi</div>
+                            </div>
+                        </div>
+
+                        <div class="pressure-range">
+                            <span class="range-label">Plage acceptable :</span>
+                            <span class="range-value" id="pressureRange">-- à -- bar</span>
+                        </div>
+
+                        <div class="fit-tips" id="pressureTips">
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <button class="calculate-btn" id="calculatePressureBtn">
+                <span>Calculer la Pression</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </button>
+
+            <footer class="footer">
+                <p>💡 <strong>Conseil :</strong> Vérifiez régulièrement la pression avant chaque sortie. La température
+                    affecte la pression (environ 0.1 bar tous les 10°C).</p>
+            </footer>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script src="pressure.js"></script>
+</body>
+
+</html>
