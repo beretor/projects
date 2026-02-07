@@ -52,6 +52,12 @@
                 </svg>
                 Pression Pneus
             </button>
+            <button class="tab-btn" data-tab="training-plan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Planification
+            </button>
         </nav>
 
         <!-- Frame Size Calculator Tab -->
@@ -590,10 +596,272 @@
                     affecte la pression (environ 0.1 bar tous les 10°C).</p>
             </footer>
         </div>
+
+        <!-- Training Plan Tab -->
+        <div class="tab-content" id="training-plan">
+            <div class="calculator-grid">
+                <section class="card input-card">
+                    <h2 class="card-title">
+                        Connectivité
+                    </h2>
+                    <div class="strava-connect-container">
+                        <div class="token-input-group">
+                            <label for="stravaToken">Token d'accès Strava</label>
+                            <input type="password" id="stravaToken" placeholder="Collez votre access_token ici">
+                            <button type="button" class="help-toggle" id="tokenHelpToggle">❓ Comment obtenir un token
+                                ?</button>
+                        </div>
+
+                        <div id="tokenHelpGuide" class="help-guide hidden">
+                            <h4>📖 Guide : Obtenir un token Strava valide</h4>
+                            <p class="help-warning">⚠️ Le token de la page "API Settings" ne suffit pas. Suivez ces
+                                étapes :</p>
+                            <ol>
+                                <li>Allez sur <a href="https://www.strava.com/settings/api" target="_blank">Strava API
+                                        Settings</a></li>
+                                <li>Notez votre <strong>Client ID</strong> et <strong>Client Secret</strong></li>
+                                <li>
+                                    <label for="clientIdInput">Entrez votre Client ID :</label>
+                                    <input type="text" id="clientIdInput" placeholder="ex: 12345" class="small-input">
+                                    <button type="button" id="generateAuthLink" class="btn-small">Générer le
+                                        lien</button>
+                                </li>
+                                <li id="authLinkStep" class="hidden">
+                                    <a id="authLink" href="#" target="_blank" class="auth-link">👉 Cliquez ici pour
+                                        autoriser l'accès</a>
+                                    <p class="tiny">Après autorisation, copiez le <code>code</code> de l'URL de
+                                        redirection.</p>
+                                </li>
+                                <li>
+                                    Dans un terminal, exécutez :
+                                    <pre class="code-block">curl -X POST https://www.strava.com/oauth/token \
+  -d client_id=VOTRE_CLIENT_ID \
+  -d client_secret=VOTRE_CLIENT_SECRET \
+  -d code=LE_CODE_COPIÉ \
+  -d grant_type=authorization_code</pre>
+                                </li>
+                                <li>Copiez le <code>access_token</code> du résultat JSON ci-dessus.</li>
+                            </ol>
+                        </div>
+
+                        <button id="connectStravaBtn" class="strava-btn">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                                <path
+                                    d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L15.387 0 10.537 9.574h4.844" />
+                            </svg>
+                            Synchroniser Strava
+                        </button>
+                        <p id="stravaStatus" class="strava-status hidden">✅ Données synchronisées</p>
+                        <p id="stravaError" class="strava-error hidden">❌ Erreur de connexion</p>
+                    </div>
+                </section>
+
+                <section class="card input-card constraints-card">
+                    <h2 class="card-title">
+                        🎯 Vos Contraintes d'Entraînement
+                    </h2>
+
+                    <div class="form-group">
+                        <label>Jours d'entraînement possibles</label>
+                        <div class="week-selector">
+                            <label class="day-checkbox">
+                                <input type="checkbox" name="trainingDay" value="1" checked>
+                                <span>Lun</span>
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" name="trainingDay" value="2" checked>
+                                <span>Mar</span>
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" name="trainingDay" value="3" checked>
+                                <span>Mer</span>
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" name="trainingDay" value="4" checked>
+                                <span>Jeu</span>
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" name="trainingDay" value="5">
+                                <span>Ven</span>
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" name="trainingDay" value="6" checked>
+                                <span>Sam</span>
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" name="trainingDay" value="0" checked>
+                                <span>Dim</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maxHours">Volume Hebdomadaire Max</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="maxHours" placeholder="10" min="3" max="25" value="10">
+                            <span class="unit">h</span>
+                        </div>
+                    </div>
+
+                    <div class="form-divider"></div>
+
+                    <div class="form-group">
+                        <label>🚴 Sortie Longue</label>
+                        <div class="toggle-options">
+                            <label class="toggle-option">
+                                <input type="checkbox" id="longRideWeekendOnly" checked>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Uniquement le week-end</span>
+                            </label>
+                        </div>
+                        <span class="helper-text">Les sorties longues (+3h) seront planifiées Sam/Dim</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>🏠 Home Trainer</label>
+                        <div class="toggle-options">
+                            <label class="toggle-option">
+                                <input type="checkbox" id="hasHomeTrainer">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">J'ai un home trainer</span>
+                            </label>
+                        </div>
+                        <div id="homeTrainerDays" class="sub-options hidden">
+                            <span class="sub-label">Jours préférés pour le HT :</span>
+                            <div class="week-selector small">
+                                <label class="day-checkbox small">
+                                    <input type="checkbox" name="htDay" value="1">
+                                    <span>Lun</span>
+                                </label>
+                                <label class="day-checkbox small">
+                                    <input type="checkbox" name="htDay" value="2" checked>
+                                    <span>Mar</span>
+                                </label>
+                                <label class="day-checkbox small">
+                                    <input type="checkbox" name="htDay" value="3">
+                                    <span>Mer</span>
+                                </label>
+                                <label class="day-checkbox small">
+                                    <input type="checkbox" name="htDay" value="4" checked>
+                                    <span>Jeu</span>
+                                </label>
+                                <label class="day-checkbox small">
+                                    <input type="checkbox" name="htDay" value="5">
+                                    <span>Ven</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>🚲 Vélotaf (Trajet Domicile-Travail)</label>
+                        <div class="toggle-options">
+                            <label class="toggle-option">
+                                <input type="checkbox" id="hasVelotaf">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Je fais du vélotaf</span>
+                            </label>
+                        </div>
+                        <div id="velotafOptions" class="sub-options hidden">
+                            <div class="velotaf-config">
+                                <div class="velotaf-input">
+                                    <label for="velotafDistance">Distance A/R</label>
+                                    <div class="input-wrapper small">
+                                        <input type="number" id="velotafDistance" placeholder="20" min="5" max="100"
+                                            value="20">
+                                        <span class="unit">km</span>
+                                    </div>
+                                </div>
+                                <div class="velotaf-input">
+                                    <label for="velotafDays">Jours/semaine</label>
+                                    <div class="input-wrapper small">
+                                        <input type="number" id="velotafDaysCount" placeholder="3" min="1" max="5"
+                                            value="3">
+                                        <span class="unit">j</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="helper-text">≈ <span id="velotafWeeklyKm">60</span> km/sem de volume
+                                additionnel</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card results-card" id="lastWeekCard">
+                    <h2 class="card-title">
+                        Bilan Semaine Dernière
+                    </h2>
+
+                    <div id="lastWeekPlaceholder" class="results-placeholder">
+                        <p>Connectez Strava pour voir votre bilan.</p>
+                    </div>
+
+                    <div id="lastWeekContent" class="hidden">
+                        <div class="last-week-summary">
+                            <div class="summary-stat">
+                                <span class="stat-label">Distance</span>
+                                <span class="stat-value" id="lastWeekDist">--</span>
+                                <span class="stat-unit">km</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="stat-label">Temps</span>
+                                <span class="stat-value" id="lastWeekTime">--</span>
+                                <span class="stat-unit">h</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="stat-label">Dénivelé</span>
+                                <span class="stat-value" id="lastWeekElev">--</span>
+                                <span class="stat-unit">m</span>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="activities-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Activité</th>
+                                        <th>Dist.</th>
+                                        <th>Durée</th>
+                                        <th>D+</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lastWeekTableBody">
+                                    <!-- Rows injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card results-card" id="scheduleCard">
+                    <h2 class="card-title">
+                        Semaine Type - Tour des Flandres 2026
+                    </h2>
+
+                    <div id="schedulePlaceholder" class="results-placeholder">
+                        <p>Configurez vos disponibilités pour générer votre semaine.</p>
+                    </div>
+
+                    <div id="calendarView" class="calendar-view hidden">
+                        <!-- Weekly schedule will be injected here -->
+                    </div>
+                </section>
+            </div>
+
+            <button class="calculate-btn" id="generateScheduleBtn">
+                <span>Générer mon programme</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M19 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zm-7 15l-5-5 1.41-1.41L12 16.17l7.59-7.59L21 10l-9 9z" />
+                </svg>
+            </button>
+        </div>
     </main>
 
     <script src="app.js"></script>
     <script src="pressure.js"></script>
+    <script src="planning.js"></script>
 </body>
 
 </html>
