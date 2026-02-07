@@ -75,6 +75,38 @@ class TrainingManager {
                 authLinkStep.classList.remove('hidden');
             });
         }
+
+        // Home Trainer toggle
+        const htToggle = document.getElementById('hasHomeTrainer');
+        const htDays = document.getElementById('homeTrainerDays');
+        if (htToggle && htDays) {
+            htToggle.addEventListener('change', () => {
+                htDays.classList.toggle('hidden', !htToggle.checked);
+            });
+        }
+
+        // Velotaf toggle
+        const velotafToggle = document.getElementById('hasVelotaf');
+        const velotafOptions = document.getElementById('velotafOptions');
+        const velotafDistance = document.getElementById('velotafDistance');
+        const velotafDaysCount = document.getElementById('velotafDaysCount');
+        const velotafWeeklyKm = document.getElementById('velotafWeeklyKm');
+
+        if (velotafToggle && velotafOptions) {
+            velotafToggle.addEventListener('change', () => {
+                velotafOptions.classList.toggle('hidden', !velotafToggle.checked);
+            });
+        }
+
+        // Calculate velotaf weekly km
+        const updateVelotafKm = () => {
+            if (velotafDistance && velotafDaysCount && velotafWeeklyKm) {
+                const weekly = (parseInt(velotafDistance.value) || 0) * (parseInt(velotafDaysCount.value) || 0);
+                velotafWeeklyKm.textContent = weekly;
+            }
+        };
+        if (velotafDistance) velotafDistance.addEventListener('input', updateVelotafKm);
+        if (velotafDaysCount) velotafDaysCount.addEventListener('input', updateVelotafKm);
     }
 
     updateConstraints() {
@@ -199,7 +231,7 @@ class TrainingManager {
         let totalTime = 0;
         let totalElev = 0;
 
-        const rows = activities.map(a => {
+        const cards = activities.map(a => {
             totalDist += a.distance;
             totalTime += a.moving_time;
             totalElev += a.total_elevation_gain;
@@ -208,30 +240,39 @@ class TrainingManager {
             const dateStr = date.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: '2-digit' });
             const h = Math.floor(a.moving_time / 3600);
             const m = Math.floor((a.moving_time % 3600) / 60);
+            const dist = (a.distance / 1000).toFixed(1);
+            const elev = Math.round(a.total_elevation_gain);
 
             return `
-                <tr>
-                    <td>${dateStr}</td>
-                    <td><span class="activity-name">${a.name}</span></td>
-                    <td>${(a.distance / 1000).toFixed(1)} km</td>
-                    <td>${h}h${m < 10 ? '0' : ''}${m}</td>
-                    <td>${Math.round(a.total_elevation_gain)} m</td>
-                </tr>
+                <div class="activity-card">
+                    <span class="activity-date">${dateStr}</span>
+                    <div class="activity-details">
+                        <div class="activity-name">${a.name}</div>
+                        <div class="activity-stats">${dist} km • ${h}h${m < 10 ? '0' : ''}${m} • ${elev}m D+</div>
+                    </div>
+                </div>
             `;
         }).join('');
 
         this.lastWeekPlaceholder.classList.add('hidden');
         this.lastWeekContent.classList.remove('hidden');
 
-        // Summary
+        // Summary Stats
         this.lastWeekDist.textContent = Math.round(totalDist / 1000);
         const th = Math.floor(totalTime / 3600);
         const tm = Math.floor((totalTime % 3600) / 60);
         this.lastWeekTime.textContent = `${th}h${tm < 10 ? '0' : ''}${tm}`;
         this.lastWeekElev.textContent = Math.round(totalElev);
 
-        // Table
-        this.lastWeekTableBody.innerHTML = rows || '<tr><td colspan="5">Aucune activité la semaine dernière</td></tr>';
+        // Activity count
+        const countEl = document.getElementById('lastWeekCount');
+        if (countEl) countEl.textContent = activities.length;
+
+        // Activity List
+        const listEl = document.getElementById('lastWeekActivitiesList');
+        if (listEl) {
+            listEl.innerHTML = cards || '<p class="no-activities">Aucune activité la semaine dernière</p>';
+        }
     }
 
     renderLastWeekStats(stats) {

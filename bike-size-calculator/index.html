@@ -38,7 +38,7 @@
 
         <!-- Tab Navigation -->
         <nav class="tab-nav">
-            <button class="tab-btn active" data-tab="frame-size">
+            <button class="tab-btn" data-tab="frame-size">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M21 21H3M21 21V3M3 21V12M12 21V6" />
                 </svg>
@@ -52,7 +52,7 @@
                 </svg>
                 Pression Pneus
             </button>
-            <button class="tab-btn" data-tab="training-plan">
+            <button class="tab-btn active" data-tab="training-plan">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -61,7 +61,7 @@
         </nav>
 
         <!-- Frame Size Calculator Tab -->
-        <div class="tab-content active" id="frame-size">
+        <div class="tab-content" id="frame-size">
             <div class="calculator-grid">
                 <section class="card input-card">
                     <h2 class="card-title">
@@ -598,7 +598,7 @@
         </div>
 
         <!-- Training Plan Tab -->
-        <div class="tab-content" id="training-plan">
+        <div class="tab-content active" id="training-plan">
             <div class="calculator-grid">
                 <section class="card input-card">
                     <h2 class="card-title">
@@ -787,49 +787,55 @@
                     </div>
                 </section>
 
-                <section class="card results-card" id="lastWeekCard">
+                <section class="card results-card last-week-card" id="lastWeekCard">
                     <h2 class="card-title">
-                        Bilan Semaine Dernière
+                        📊 Bilan Semaine Dernière
                     </h2>
 
                     <div id="lastWeekPlaceholder" class="results-placeholder">
+                        <div class="placeholder-icon">🔗</div>
                         <p>Connectez Strava pour voir votre bilan.</p>
                     </div>
 
                     <div id="lastWeekContent" class="hidden">
-                        <div class="last-week-summary">
-                            <div class="summary-stat">
+                        <div class="stats-grid">
+                            <div class="stat-card distance">
+                                <div class="stat-icon">🛣️</div>
+                                <div class="stat-info">
+                                    <span class="stat-value" id="lastWeekDist">--</span>
+                                    <span class="stat-unit">km</span>
+                                </div>
                                 <span class="stat-label">Distance</span>
-                                <span class="stat-value" id="lastWeekDist">--</span>
-                                <span class="stat-unit">km</span>
                             </div>
-                            <div class="summary-stat">
-                                <span class="stat-label">Temps</span>
-                                <span class="stat-value" id="lastWeekTime">--</span>
-                                <span class="stat-unit">h</span>
+                            <div class="stat-card time">
+                                <div class="stat-icon">⏱️</div>
+                                <div class="stat-info">
+                                    <span class="stat-value" id="lastWeekTime">--</span>
+                                </div>
+                                <span class="stat-label">Temps en selle</span>
                             </div>
-                            <div class="summary-stat">
+                            <div class="stat-card elevation">
+                                <div class="stat-icon">⛰️</div>
+                                <div class="stat-info">
+                                    <span class="stat-value" id="lastWeekElev">--</span>
+                                    <span class="stat-unit">m</span>
+                                </div>
                                 <span class="stat-label">Dénivelé</span>
-                                <span class="stat-value" id="lastWeekElev">--</span>
-                                <span class="stat-unit">m</span>
+                            </div>
+                            <div class="stat-card activities">
+                                <div class="stat-icon">🚴</div>
+                                <div class="stat-info">
+                                    <span class="stat-value" id="lastWeekCount">--</span>
+                                </div>
+                                <span class="stat-label">Sorties</span>
                             </div>
                         </div>
 
-                        <div class="table-container">
-                            <table class="activities-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Activité</th>
-                                        <th>Dist.</th>
-                                        <th>Durée</th>
-                                        <th>D+</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="lastWeekTableBody">
-                                    <!-- Rows injected here -->
-                                </tbody>
-                            </table>
+                        <div class="activities-section">
+                            <h3 class="section-subtitle">Détail des activités</h3>
+                            <div class="activities-list" id="lastWeekActivitiesList">
+                                <!-- Activity cards injected here -->
+                            </div>
                         </div>
                     </div>
                 </section>

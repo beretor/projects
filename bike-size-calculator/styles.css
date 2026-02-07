@@ -1278,6 +1278,267 @@ body {
     margin-top: 0.5rem;
 }
 
+/* Form Divider */
+.form-divider {
+    height: 1px;
+    background: var(--color-border);
+    margin: 1.5rem 0;
+}
+
+/* Toggle Switch Styles */
+.toggle-options {
+    margin-top: 0.5rem;
+}
+
+.toggle-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+}
+
+.toggle-option input {
+    display: none;
+}
+
+.toggle-slider {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: var(--color-border);
+    border-radius: 24px;
+    transition: background var(--transition-fast);
+}
+
+.toggle-slider::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform var(--transition-fast);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-option input:checked+.toggle-slider {
+    background: #FC4C02;
+}
+
+.toggle-option input:checked+.toggle-slider::after {
+    transform: translateX(20px);
+}
+
+.toggle-label {
+    font-size: 0.875rem;
+    color: var(--color-text);
+}
+
+/* Sub Options */
+.sub-options {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--color-bg-alt);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid #FC4C02;
+}
+
+.sub-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.week-selector.small {
+    gap: 0.25rem;
+}
+
+.day-checkbox.small span {
+    width: 32px;
+    height: 32px;
+    font-size: 0.65rem;
+}
+
+/* Velotaf Config */
+.velotaf-config {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.velotaf-input label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.input-wrapper.small {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.input-wrapper.small input {
+    width: 60px;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+.input-wrapper.small .unit {
+    font-size: 0.75rem;
+}
+
+/* Stats Grid (Last Week Summary) */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.stat-card {
+    background: linear-gradient(135deg, var(--color-bg-alt) 0%, var(--color-bg) 100%);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card.distance {
+    border-top: 3px solid #2196F3;
+}
+
+.stat-card.time {
+    border-top: 3px solid #4CAF50;
+}
+
+.stat-card.elevation {
+    border-top: 3px solid #ff4136;
+}
+
+.stat-card.activities {
+    border-top: 3px solid #FC4C02;
+}
+
+.stat-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-info {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+}
+
+.stat-card .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1;
+}
+
+.stat-card .stat-unit {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+}
+
+.stat-card .stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    letter-spacing: 0.05em;
+    margin-top: 0.25rem;
+}
+
+/* Activities Section */
+.activities-section {
+    border-top: 1px solid var(--color-border);
+    padding-top: 1rem;
+}
+
+.section-subtitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
+}
+
+.activities-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.activity-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-bg-alt);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid #FC4C02;
+}
+
+.activity-date {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    min-width: 70px;
+    font-weight: 500;
+}
+
+.activity-details {
+    flex: 1;
+}
+
+.activity-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--color-text);
+    margin-bottom: 0.125rem;
+}
+
+.activity-stats {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+/* Placeholder Icon */
+.placeholder-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+}
+
+.results-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
 .day-checkbox {
     cursor: pointer;
 }
