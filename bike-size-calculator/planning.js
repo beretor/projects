@@ -12,6 +12,21 @@ class TrainingManager {
 
         this.cacheDOM();
         this.bindEvents();
+        this.checkStoredToken();
+
+        this.sportIcons = {
+            'Ride': '🚴',
+            'VirtualRide': '⚡',
+            'Run': '🏃',
+            'Swim': '🏊',
+            'Walk': '🚶',
+            'Hike': '🥾',
+            'Workout': '💪',
+            'WeightTraining': '🏋️',
+            'Yoga': '🧘',
+            'Gravel Ride': '🚴',
+            'Mountain Bike Ride': '🚵'
+        };
     }
 
     cacheDOM() {
@@ -119,50 +134,84 @@ class TrainingManager {
     }
 
     async handleStravaAuth() {
-        const token = this.tokenInput.value.trim();
+        // New Flow: Popup to Server OAuth
+        const width = 600;
+        const height = 700;
+        const left = (window.screen.width - width) / 2;
+        const top = (window.screen.height - height) / 2;
 
-        if (!token) {
-            alert('Veuillez entrer un token d\'accès Strava.');
-            return;
+        const authUrl = 'http://localhost:8000/oauth/authorize';
+        window.open(authUrl, 'StravaAuth', `width=${width},height=${height},top=${top},left=${left}`);
+
+        // Listen for message from popup
+        window.addEventListener('message', this.handleAuthMessage.bind(this), { once: true });
+    }
+
+    handleAuthMessage(event) {
+        if (event.data.type === 'STRAVA_TOKEN') {
+            const { token, athlete } = event.data;
+            this.handleAuthSuccess(token, athlete);
+        }
+    }
+
+    async checkStoredToken() {
+        try {
+            const response = await fetch('http://localhost:8000/api/token');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.access_token) {
+                    console.log('Found stored token, auto-connecting...');
+                    this.handleAuthSuccess(data.access_token, data.athlete);
+                }
+            }
+        } catch (e) {
+            console.log('No local token server found or no token stored.');
+        }
+    }
+
+    handleAuthSuccess(token, athlete) {
+        this.isConnected = true;
+        this.token = token;
+
+        // Hide input/button group
+        const connectContainer = document.querySelector('.strava-connect-container');
+        if (connectContainer) {
+            connectContainer.innerHTML = `
+                <div class="strava-connected-card">
+                    <div class="user-info">
+                        <span class="status-icon">✅</span>
+                        <div>
+                            <strong>Connecté avec Strava</strong>
+                            <div class="user-name">${athlete.firstname} ${athlete.lastname}</div>
+                        </div>
+                    </div>
+                    <button id="disconnectBtn" class="btn-text">Déconnecter</button>
+                </div>
+             `;
+
+            // Re-bind disconnect
+            document.getElementById('disconnectBtn').addEventListener('click', () => {
+                this.isConnected = false;
+                this.token = null;
+                window.location.reload(); // Simple way to reset state
+            });
         }
 
-        this.connectBtn.textContent = 'Connexion...';
-        this.connectBtn.disabled = true;
-        this.statusText.classList.add('hidden');
-        this.errorText.classList.add('hidden');
-
-        try {
-            // Verify token by fetching athlete info
-            const athleteRes = await fetch('https://www.strava.com/api/v3/athlete', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (!athleteRes.ok) throw new Error('Token invalide');
-
-            const athlete = await athleteRes.json();
-            this.isConnected = true;
-            this.token = token;
+        // Show status (if still needed, though UI above replaces it)
+        if (this.statusText) {
             this.statusText.classList.remove('hidden');
             this.statusText.innerHTML = `✅ Connecté: <strong>${athlete.firstname} ${athlete.lastname}</strong>`;
-
-            // Now fetch activities
-            await this.fetchStravaActivities();
-
-        } catch (error) {
-            console.error('Strava Auth Error:', error);
-            this.errorText.classList.remove('hidden');
-            this.errorText.textContent = '❌ Token invalide ou expiré';
-        } finally {
-            this.connectBtn.textContent = 'Synchroniser';
-            this.connectBtn.disabled = false;
         }
+
+        // Fetch activities
+        this.fetchStravaActivities();
     }
 
     async fetchStravaActivities() {
         const now = new Date();
-        const fourteenDaysAgo = new Date(now);
-        fourteenDaysAgo.setDate(now.getDate() - 14);
-        const afterTimestamp = Math.floor(fourteenDaysAgo.getTime() / 1000);
+        const tenDaysAgo = new Date(now);
+        tenDaysAgo.setDate(now.getDate() - 10);
+        const afterTimestamp = Math.floor(tenDaysAgo.getTime() / 1000);
 
         try {
             const response = await fetch(`https://www.strava.com/api/v3/athlete/activities?after=${afterTimestamp}&per_page=50`, {
@@ -183,7 +232,7 @@ class TrainingManager {
             }
 
             const activities = await response.json();
-            this.showNotification(`✅ ${activities.length} activités récupérées des 14 derniers jours !`);
+            this.showNotification(`✅ ${activities.length} activités récupérées des 10 derniers jours !`);
             this.processActivities(activities);
 
         } catch (error) {
@@ -194,25 +243,12 @@ class TrainingManager {
     }
 
     processActivities(activities) {
-        // Calculate week boundaries
+        // Render ALL fetched activities (Last 10 Days)
+        this.renderLastWeekStatsFromAPI(activities);
+
+        // Calculate week boundaries for Planning
         const today = new Date();
         const startOfCurrentWeek = this.getPreviousMonday(today);
-
-        const endOfLastWeek = new Date(startOfCurrentWeek);
-        endOfLastWeek.setDate(endOfLastWeek.getDate() - 1);
-        endOfLastWeek.setHours(23, 59, 59);
-
-        const startOfLastWeek = new Date(endOfLastWeek);
-        startOfLastWeek.setDate(startOfLastWeek.getDate() - 6);
-        startOfLastWeek.setHours(0, 0, 0);
-
-        // Filter for last week
-        const lastWeekActivities = activities.filter(a => {
-            const d = new Date(a.start_date);
-            return d >= startOfLastWeek && d <= endOfLastWeek;
-        });
-
-        this.renderLastWeekStatsFromAPI(lastWeekActivities);
 
         // Store current week activities for schedule
         this.currentWeekActivities = activities.filter(a => {
@@ -231,6 +267,9 @@ class TrainingManager {
         let totalTime = 0;
         let totalElev = 0;
 
+        // Sport Icons Mapping from class property
+        const sportIcons = this.sportIcons;
+
         const cards = activities.map(a => {
             totalDist += a.distance;
             totalTime += a.moving_time;
@@ -242,17 +281,22 @@ class TrainingManager {
             const m = Math.floor((a.moving_time % 3600) / 60);
             const dist = (a.distance / 1000).toFixed(1);
             const elev = Math.round(a.total_elevation_gain);
+            const icon = sportIcons[a.type] || '🏅';
 
             return `
                 <div class="activity-card">
-                    <span class="activity-date">${dateStr}</span>
-                    <div class="activity-details">
-                        <div class="activity-name">${a.name}</div>
-                        <div class="activity-stats">${dist} km • ${h}h${m < 10 ? '0' : ''}${m} • ${elev}m D+</div>
+                    <div class="activity-icon-wrapper">${icon}</div>
+                    <div class="activity-content">
+                        <span class="activity-date">${dateStr}</span>
+                        <div class="activity-details">
+                            <div class="activity-name">${a.name}</div>
+                            <div class="activity-stats">${dist} km • ${h}h${m < 10 ? '0' : ''}${m} • ${elev}m D+</div>
+                        </div>
                     </div>
                 </div>
             `;
         }).join('');
+
 
         this.lastWeekPlaceholder.classList.add('hidden');
         this.lastWeekContent.classList.remove('hidden');
@@ -351,6 +395,7 @@ class TrainingManager {
                     // Real activity found - use Strava data
                     workout.completed = true;
                     workout.title = completedActivity.name;
+                    workout.sport = completedActivity.type;
                     const dist = (completedActivity.distance / 1000).toFixed(1);
                     const elev = Math.round(completedActivity.total_elevation_gain);
                     workout.description = `Strava: ${dist}km | ${elev}m D+`;
@@ -365,6 +410,7 @@ class TrainingManager {
                 workout = {
                     type: 'base',
                     title: completedActivity.name,
+                    sport: completedActivity.type,
                     description: `Non planifié: ${(completedActivity.distance / 1000).toFixed(1)}km`,
                     duration: this.formatDuration(completedActivity.moving_time),
                     difficulty: 'N/A',
@@ -408,6 +454,7 @@ class TrainingManager {
             return {
                 type: 'long_ride',
                 title: 'Sortie Longue - Endurance',
+                sport: 'Ride',
                 description: 'Focus sur l\'endurance fondamentale. Intégrez des sections pavées ou des chemins si possible. Cadence 85-95 rpm.',
                 duration: '3h00 - 4h00',
                 difficulty: 'Moyenne',
@@ -417,6 +464,7 @@ class TrainingManager {
             return {
                 type: 'intervals',
                 title: 'Intervalles au Seuil',
+                sport: 'Ride',
                 description: 'Echauffement 20min. 3 x 10min au seuil (Z4) avec 5min de récupération. Retour au calme 15min.',
                 duration: '1h30',
                 difficulty: 'Elevée',
@@ -426,6 +474,7 @@ class TrainingManager {
             return {
                 type: 'base',
                 title: 'Endurance de Base',
+                sport: 'Ride',
                 description: 'Sortie souple pour accumuler du volume sans fatigue excessive. Restez en Z2.',
                 duration: '2h00',
                 difficulty: 'Faible',
@@ -462,7 +511,8 @@ class TrainingManager {
                     </div>
                     <div class="workout-details">
                         <div class="workout-meta">
-                            <span class="workout-type ${day.workout.type}">${day.workout.title}</span>
+                            <span class="workout-sport-icon" style="margin-right: 8px; font-size: 1.2em;">${this.sportIcons[day.workout.sport] || '🏅'}</span>
+                            <span class="workout-type ${day.workout.sport === 'Run' ? 'run' : day.workout.type}">${day.workout.title}</span>
                             ${statusBadge}
                         </div>
                         <p class="workout-desc">${day.workout.description}</p>
@@ -494,6 +544,14 @@ class TrainingManager {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Check if manager is already initialized or needs to be (tab is active)
+    const trainingTab = document.getElementById('training-plan');
+    if (trainingTab && trainingTab.classList.contains('active')) {
+        if (!window.trainingManager) {
+            window.trainingManager = new TrainingManager();
+        }
+    }
+
     // Handle Tab Switching globally (since it affects this module)
     const trainingTabBtn = document.querySelector('button[data-tab="training-plan"]');
 
