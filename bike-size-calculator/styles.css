@@ -803,6 +803,65 @@ body {
     margin-bottom: 0.75rem;
 }
 
+/* ============================
+   Activity Table - Clean & Minimal
+   ============================ */
+.table-container {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.activity-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    text-align: left;
+}
+
+.activity-table th {
+    font-weight: 600;
+    color: var(--color-text-muted);
+    padding: 1rem;
+    border-bottom: 2px solid var(--color-border);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.75rem;
+}
+
+.activity-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+}
+
+.activity-table tr:last-child td {
+    border-bottom: none;
+}
+
+.activity-table tr:hover {
+    background-color: var(--color-bg-alt);
+}
+
+/* Activity Type Icons in Table */
+.activity-icon {
+    margin-right: 0.5rem;
+}
+
+/* Responsive Table */
+@media (max-width: 600px) {
+
+    .activity-table th,
+    .activity-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .activity-table th:nth-child(4),
+    .activity-table td:nth-child(4) {
+        display: none;
+        /* Hide Elevation on very small screens */
+    }
+}
+
 .preset-buttons {
     display: flex;
     gap: 0.5rem;
@@ -1346,10 +1405,12 @@ body {
 }
 
 .sub-label {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    color: var(--color-text);
+    /* Darker for better readability */
     display: block;
     margin-bottom: 0.5rem;
+    opacity: 0.8;
 }
 
 .week-selector.small {
@@ -1370,10 +1431,12 @@ body {
 }
 
 .velotaf-input label {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    color: var(--color-text);
+    /* Darker for better readability */
     display: block;
     margin-bottom: 0.25rem;
+    opacity: 0.8;
 }
 
 .input-wrapper.small {
@@ -1497,6 +1560,10 @@ body {
     background: var(--color-bg-alt);
     border-radius: var(--radius-sm);
     border-left: 3px solid #FC4C02;
+}
+
+.activity-card.run-card {
+    border-left-color: #00d2ff;
 }
 
 .activity-date {

@@ -30,6 +30,7 @@ class OAuthHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
+        print(f"DEBUG: Request path: {parsed.path}")
 
         if parsed.path == "/oauth/authorize":
             # Redirect to Strava OAuth

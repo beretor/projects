@@ -2,6 +2,9 @@
 // Module de Planification - Tour des Flandres 2026
 // ============================
 
+const RACE_DATE = new Date('2026-04-05T00:00:00');
+const PLAN_START_DATE = new Date('2026-01-01T00:00:00');
+
 class TrainingManager {
     constructor() {
         this.isConnected = false;
@@ -12,84 +15,73 @@ class TrainingManager {
 
         this.cacheDOM();
         this.bindEvents();
-        this.checkStoredToken();
 
-        this.sportIcons = {
-            'Ride': '🚴',
-            'VirtualRide': '⚡',
-            'Run': '🏃',
-            'Swim': '🏊',
-            'Walk': '🚶',
-            'Hike': '🥾',
-            'Workout': '💪',
-            'WeightTraining': '🏋️',
-            'Yoga': '🧘',
-            'Gravel Ride': '🚴',
-            'Mountain Bike Ride': '🚵'
-        };
+        // Check for stored token
+        const storedToken = localStorage.getItem('strava_access_token');
+        if (storedToken) {
+            this.tokenInput.value = storedToken;
+            this.handleOAuthSuccess({
+                token: storedToken,
+                athlete: JSON.parse(localStorage.getItem('strava_athlete') || '{}')
+            });
+        }
     }
 
     cacheDOM() {
         this.connectBtn = document.getElementById('connectStravaBtn');
         this.statusText = document.getElementById('stravaStatus');
         this.errorText = document.getElementById('stravaError');
-        this.tokenInput = document.getElementById('stravaToken');
+        this.tokenInput = document.getElementById('stravaToken'); // Hidden input
         this.dayCheckboxes = document.querySelectorAll('input[name="trainingDay"]');
         this.maxHoursInput = document.getElementById('maxHours');
         this.generateBtn = document.getElementById('generateScheduleBtn');
         this.calendarView = document.getElementById('calendarView');
         this.schedulePlaceholder = document.getElementById('schedulePlaceholder');
 
-        // Last Week Elements
-        this.lastWeekPlaceholder = document.getElementById('lastWeekPlaceholder');
-        this.lastWeekContent = document.getElementById('lastWeekContent');
-        this.lastWeekDist = document.getElementById('lastWeekDist');
-        this.lastWeekTime = document.getElementById('lastWeekTime');
-        this.lastWeekElev = document.getElementById('lastWeekElev');
-        this.lastWeekTableBody = document.getElementById('lastWeekTableBody');
+        // History Elements
+        this.historyPlaceholder = document.getElementById('historyPlaceholder');
+        this.historyContent = document.getElementById('historyContent');
     }
 
     bindEvents() {
-        this.connectBtn.addEventListener('click', () => this.handleStravaAuth());
-        this.generateBtn.addEventListener('click', () => this.generateSchedule());
+        // OAuth 1-Click Connection
+        this.connectBtn.addEventListener('click', () => {
+            const width = 600, height = 700;
+            const left = (window.innerWidth / 2) - (width / 2);
+            const top = (window.innerHeight / 2) - (height / 2);
+
+            window.open(
+                '/oauth/authorize',
+                'StravaAuth',
+                `width=${width},height=${height},top=${top},left=${left}`
+            );
+        });
+
+        // Listen for token from popup
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'STRAVA_TOKEN') {
+                this.handleOAuthSuccess(event.data);
+            }
+        });
+
+        // Generate schedule trigger (if button still exists, or auto-update on changes)
+        // We'll auto-update if already generated once.
+        if (this.generateBtn) {
+            this.generateBtn.addEventListener('click', () => this.generateSchedule());
+        }
 
         // Listen for constraint changes
         this.dayCheckboxes.forEach(cb => {
-            cb.addEventListener('change', () => this.updateConstraints());
+            cb.addEventListener('change', () => {
+                this.updateConstraints();
+                if (!this.calendarView.classList.contains('hidden')) this.generateSchedule();
+            });
         });
 
-        this.maxHoursInput.addEventListener('change', () => this.updateConstraints());
-
-        // Help guide toggle
-        const helpToggle = document.getElementById('tokenHelpToggle');
-        const helpGuide = document.getElementById('tokenHelpGuide');
-        if (helpToggle && helpGuide) {
-            helpToggle.addEventListener('click', () => {
-                helpGuide.classList.toggle('hidden');
-                helpToggle.textContent = helpGuide.classList.contains('hidden')
-                    ? '❓ Comment obtenir un token ?'
-                    : '✕ Fermer le guide';
-            });
-        }
-
-        // OAuth link generator
-        const generateLinkBtn = document.getElementById('generateAuthLink');
-        const clientIdInput = document.getElementById('clientIdInput');
-        const authLinkStep = document.getElementById('authLinkStep');
-        const authLink = document.getElementById('authLink');
-
-        if (generateLinkBtn && clientIdInput) {
-            generateLinkBtn.addEventListener('click', () => {
-                const clientId = clientIdInput.value.trim();
-                if (!clientId) {
-                    alert('Entrez votre Client ID');
-                    return;
-                }
-                const oauthUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=http://localhost&scope=read,activity:read_all&approval_prompt=force`;
-                authLink.href = oauthUrl;
-                authLinkStep.classList.remove('hidden');
-            });
-        }
+        this.maxHoursInput.addEventListener('change', () => {
+            this.updateConstraints();
+            if (!this.calendarView.classList.contains('hidden')) this.generateSchedule();
+        });
 
         // Home Trainer toggle
         const htToggle = document.getElementById('hasHomeTrainer');
@@ -97,6 +89,7 @@ class TrainingManager {
         if (htToggle && htDays) {
             htToggle.addEventListener('change', () => {
                 htDays.classList.toggle('hidden', !htToggle.checked);
+                if (!this.calendarView.classList.contains('hidden')) this.generateSchedule();
             });
         }
 
@@ -110,6 +103,7 @@ class TrainingManager {
         if (velotafToggle && velotafOptions) {
             velotafToggle.addEventListener('change', () => {
                 velotafOptions.classList.toggle('hidden', !velotafToggle.checked);
+                if (!this.calendarView.classList.contains('hidden')) this.generateSchedule();
             });
         }
 
@@ -131,90 +125,49 @@ class TrainingManager {
 
         this.constraints.days = selectedDays;
         this.constraints.maxHours = parseInt(this.maxHoursInput.value) || 10;
+        this.constraints.hasHomeTrainer = document.getElementById('hasHomeTrainer')?.checked || false;
+        this.constraints.hasVelotaf = document.getElementById('hasVelotaf')?.checked || false;
     }
 
-    async handleStravaAuth() {
-        // New Flow: Popup to Server OAuth
-        const width = 600;
-        const height = 700;
-        const left = (window.screen.width - width) / 2;
-        const top = (window.screen.height - height) / 2;
+    handleOAuthSuccess(data) {
+        if (!data.token) return;
 
-        const authUrl = 'http://localhost:8000/oauth/authorize';
-        window.open(authUrl, 'StravaAuth', `width=${width},height=${height},top=${top},left=${left}`);
-
-        // Listen for message from popup
-        window.addEventListener('message', this.handleAuthMessage.bind(this), { once: true });
-    }
-
-    handleAuthMessage(event) {
-        if (event.data.type === 'STRAVA_TOKEN') {
-            const { token, athlete } = event.data;
-            this.handleAuthSuccess(token, athlete);
-        }
-    }
-
-    async checkStoredToken() {
-        try {
-            const response = await fetch('http://localhost:8000/api/token');
-            if (response.ok) {
-                const data = await response.json();
-                if (data.access_token) {
-                    console.log('Found stored token, auto-connecting...');
-                    this.handleAuthSuccess(data.access_token, data.athlete);
-                }
-            }
-        } catch (e) {
-            console.log('No local token server found or no token stored.');
-        }
-    }
-
-    handleAuthSuccess(token, athlete) {
+        this.token = data.token;
+        this.tokenInput.value = data.token; // Store for valid check
         this.isConnected = true;
-        this.token = token;
 
-        // Hide input/button group
-        const connectContainer = document.querySelector('.strava-connect-container');
-        if (connectContainer) {
-            connectContainer.innerHTML = `
-                <div class="strava-connected-card">
-                    <div class="user-info">
-                        <span class="status-icon">✅</span>
-                        <div>
-                            <strong>Connecté avec Strava</strong>
-                            <div class="user-name">${athlete.firstname} ${athlete.lastname}</div>
-                        </div>
-                    </div>
-                    <button id="disconnectBtn" class="btn-text">Déconnecter</button>
-                </div>
-             `;
-
-            // Re-bind disconnect
-            document.getElementById('disconnectBtn').addEventListener('click', () => {
-                this.isConnected = false;
-                this.token = null;
-                window.location.reload(); // Simple way to reset state
-            });
+        // Persist token
+        localStorage.setItem('strava_access_token', data.token);
+        if (data.athlete) {
+            localStorage.setItem('strava_athlete', JSON.stringify(data.athlete));
         }
 
-        // Show status (if still needed, though UI above replaces it)
-        if (this.statusText) {
-            this.statusText.classList.remove('hidden');
+        const athlete = data.athlete || JSON.parse(localStorage.getItem('strava_athlete') || '{}');
+        this.statusText.classList.remove('hidden');
+        if (athlete.firstname) {
             this.statusText.innerHTML = `✅ Connecté: <strong>${athlete.firstname} ${athlete.lastname}</strong>`;
+        } else {
+            this.statusText.innerHTML = `✅ Connecté`;
         }
 
-        // Fetch activities
+        this.errorText.classList.add('hidden');
+        this.connectBtn.textContent = 'Compte Strava Connecté';
+        this.connectBtn.disabled = true;
+        this.connectBtn.classList.add('connected');
+
+        // Fetch activities immediately
         this.fetchStravaActivities();
     }
 
     async fetchStravaActivities() {
+        // Fetch last 30 days
         const now = new Date();
-        const tenDaysAgo = new Date(now);
-        tenDaysAgo.setDate(now.getDate() - 10);
-        const afterTimestamp = Math.floor(tenDaysAgo.getTime() / 1000);
+        const thirtyDaysAgo = new Date(now);
+        thirtyDaysAgo.setDate(now.getDate() - 30);
+        const afterTimestamp = Math.floor(thirtyDaysAgo.getTime() / 1000);
 
         try {
-            const response = await fetch(`https://www.strava.com/api/v3/athlete/activities?after=${afterTimestamp}&per_page=50`, {
+            const response = await fetch(`https://www.strava.com/api/v3/athlete/activities?after=${afterTimestamp}&per_page=200`, {
                 headers: { 'Authorization': `Bearer ${this.token}` }
             });
 
@@ -232,7 +185,9 @@ class TrainingManager {
             }
 
             const activities = await response.json();
-            this.showNotification(`✅ ${activities.length} activités récupérées des 10 derniers jours !`);
+            this.allActivities = activities; // Store all activities
+            this.showNotification(`✅ ${activities.length} activités récupérées des 30 derniers jours !`);
+
             this.processActivities(activities);
 
         } catch (error) {
@@ -243,191 +198,351 @@ class TrainingManager {
     }
 
     processActivities(activities) {
-        // Render ALL fetched activities (Last 10 Days)
-        this.renderLastWeekStatsFromAPI(activities);
+        // Render History Table (All fetched activities)
+        this.renderHistoryTable(activities);
 
         // Calculate week boundaries for Planning
         const today = new Date();
         const startOfCurrentWeek = this.getPreviousMonday(today);
 
-        // Store current week activities for schedule
+        // Store current week activities for schedule logic
         this.currentWeekActivities = activities.filter(a => {
             const d = new Date(a.start_date);
             return d >= startOfCurrentWeek;
         });
 
-        // Refresh schedule if visible
-        if (!this.calendarView.classList.contains('hidden')) {
-            this.generateSchedule();
-        }
+        // Always generate schedule
+        this.generateSchedule();
     }
 
-    renderLastWeekStatsFromAPI(activities) {
-        let totalDist = 0;
-        let totalTime = 0;
-        let totalElev = 0;
+    renderHistoryTable(activities) {
+        if (!activities || activities.length === 0) {
+            if (this.historyPlaceholder) this.historyPlaceholder.classList.remove('hidden');
+            if (this.historyContent) this.historyContent.classList.add('hidden');
+            return;
+        }
 
-        // Sport Icons Mapping from class property
-        const sportIcons = this.sportIcons;
+        const tableBody = document.getElementById('historyTableBody');
+        if (!tableBody) return;
 
-        const cards = activities.map(a => {
-            totalDist += a.distance;
-            totalTime += a.moving_time;
-            totalElev += a.total_elevation_gain;
+        // Sort descending
+        const sortedActivities = [...activities].sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
 
+        const rows = sortedActivities.map(a => {
             const date = new Date(a.start_date);
             const dateStr = date.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: '2-digit' });
-            const h = Math.floor(a.moving_time / 3600);
-            const m = Math.floor((a.moving_time % 3600) / 60);
+
+            const isRun = a.type === 'Run';
+            const icon = isRun ? '🏃' : '🚴';
+
             const dist = (a.distance / 1000).toFixed(1);
             const elev = Math.round(a.total_elevation_gain);
-            const icon = sportIcons[a.type] || '🏅';
+
+            const h = Math.floor(a.moving_time / 3600);
+            const m = Math.floor((a.moving_time % 3600) / 60);
+            const timeStr = `${h}h${m < 10 ? '0' : ''}${m}`;
 
             return `
-                <div class="activity-card">
-                    <div class="activity-icon-wrapper">${icon}</div>
-                    <div class="activity-content">
-                        <span class="activity-date">${dateStr}</span>
-                        <div class="activity-details">
-                            <div class="activity-name">${a.name}</div>
-                            <div class="activity-stats">${dist} km • ${h}h${m < 10 ? '0' : ''}${m} • ${elev}m D+</div>
-                        </div>
-                    </div>
-                </div>
+                <tr>
+                    <td>${dateStr}</td>
+                    <td><span class="activity-icon">${icon}</span> ${a.name}</td>
+                    <td>${dist} km</td>
+                    <td>${elev} m</td>
+                    <td>${timeStr}</td>
+                </tr>
             `;
         }).join('');
 
+        tableBody.innerHTML = rows;
 
-        this.lastWeekPlaceholder.classList.add('hidden');
-        this.lastWeekContent.classList.remove('hidden');
-
-        // Summary Stats
-        this.lastWeekDist.textContent = Math.round(totalDist / 1000);
-        const th = Math.floor(totalTime / 3600);
-        const tm = Math.floor((totalTime % 3600) / 60);
-        this.lastWeekTime.textContent = `${th}h${tm < 10 ? '0' : ''}${tm}`;
-        this.lastWeekElev.textContent = Math.round(totalElev);
-
-        // Activity count
-        const countEl = document.getElementById('lastWeekCount');
-        if (countEl) countEl.textContent = activities.length;
-
-        // Activity List
-        const listEl = document.getElementById('lastWeekActivitiesList');
-        if (listEl) {
-            listEl.innerHTML = cards || '<p class="no-activities">Aucune activité la semaine dernière</p>';
-        }
-    }
-
-    renderLastWeekStats(stats) {
-        this.lastWeekPlaceholder.classList.add('hidden');
-        this.lastWeekContent.classList.remove('hidden');
-
-        // Update Summary
-        this.lastWeekDist.textContent = stats.totalDist;
-        this.lastWeekTime.textContent = stats.totalTime;
-        this.lastWeekElev.textContent = stats.totalElev;
-
-        // Update Table
-        this.lastWeekTableBody.innerHTML = stats.activities.map(activity => `
-            <tr>
-                <td>${activity.date}</td>
-                <td>
-                    <span class="activity-name">${activity.name}</span>
-                </td>
-                <td>${activity.dist}</td>
-                <td>${activity.time}</td>
-                <td>${activity.elev}</td>
-            </tr>
-        `).join('');
+        if (this.historyPlaceholder) this.historyPlaceholder.classList.add('hidden');
+        if (this.historyContent) this.historyContent.classList.remove('hidden');
     }
 
     generateSchedule() {
         if (this.constraints.days.length < 3) {
-            alert("Il est recommandé de s'entraîner au moins 3 jours par semaine pour le Tour des Flandres.");
-            return;
+            // Only alert if user explicitly clicks generate, not on auto-updates
+            // alert("Il est recommandé de s'entraîner au moins 3 jours par semaine pour le Tour des Flandres.");
+            // return;
         }
 
-        this.renderSchedule(this.createWeeklyPlan());
-
-        // Scroll to results
-        document.getElementById('scheduleCard').scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
+        const plan = this.createTrainingPlan();
+        this.renderSchedule(plan);
     }
 
-    createWeeklyPlan() {
+    createTrainingPlan() {
         const plan = [];
         const daysOfWeek = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
-        // Calculate the start of the current week (Monday)
         const today = new Date();
-        const startOfWeek = this.getPreviousMonday(today);
+        // Start from current week monday
+        const startOfPlanning = this.getPreviousMonday(today);
 
-        // Generate a 7-day schedule for the CURRENT week
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(startOfWeek);
-            date.setDate(startOfWeek.getDate() + i);
-            date.setHours(0, 0, 0, 0);
-            const dayIndex = date.getDay(); // 0 = Sunday
+        // Loop week by week
+        let currentDay = new Date(startOfPlanning);
+        let weekCount = 1;
 
-            // Check if this date is in the past
-            const isPast = date < today && date.getDate() !== today.getDate();
-            const isToday = date.getDate() === today.getDate() && date.getMonth() === today.getMonth();
+        while (currentDay <= RACE_DATE) {
+            const weekNumber = this.getWeekNumber(currentDay);
+            const isRaceWeek = currentDay > new Date(RACE_DATE.getTime() - 7 * 24 * 60 * 60 * 1000); // Rough check
 
-            const isTrainingDay = this.constraints.days.includes(dayIndex);
+            // Phase determination
+            const weeksUntilRace = Math.floor((RACE_DATE - currentDay) / (7 * 24 * 60 * 60 * 1000));
+            let phase = 'BASE';
+            let phaseDesc = 'Fondation & Endurance';
 
-            // Check for real Strava activity on this day
-            let completedActivity = null;
-            if (this.currentWeekActivities) {
-                completedActivity = this.currentWeekActivities.find(a => {
-                    const aDate = new Date(a.start_date);
-                    return aDate.getDate() === date.getDate() && aDate.getMonth() === date.getMonth();
+            if (weeksUntilRace <= 2) {
+                phase = 'TAPER';
+                phaseDesc = 'Affûtage & Fraîcheur';
+            } else if (weeksUntilRace <= 6) {
+                phase = 'PEAK';
+                phaseDesc = 'Intensité Spécifique & Monts';
+            } else if (weeksUntilRace <= 10) {
+                phase = 'BUILD';
+                phaseDesc = 'Seuil & Force';
+            }
+
+            const weekPlan = {
+                weekStart: new Date(currentDay),
+                weekEnd: new Date(currentDay),
+                weekNumber: weekCount,
+                phase: phase,
+                phaseDesc: phaseDesc,
+                days: []
+            };
+            weekPlan.weekEnd.setDate(currentDay.getDate() + 6);
+
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date(currentDay);
+                dayDate.setDate(currentDay.getDate() + i);
+
+                if (dayDate > RACE_DATE) break; // Don't go past race day
+
+                const dayIndex = dayDate.getDay();
+                const isPast = dayDate < today && dayDate.getDate() !== today.getDate();
+                const isToday = dayDate.getDate() === today.getDate() && dayDate.getMonth() === today.getMonth();
+                const isRaceDay = dayDate.getTime() === RACE_DATE.getTime();
+
+                let workout = null;
+                let completedActivity = null;
+
+                // Find Strava activity
+                if (this.allActivities) {
+                    completedActivity = this.allActivities.find(a => {
+                        const aDate = new Date(a.start_date);
+                        return aDate.getDate() === dayDate.getDate() &&
+                            aDate.getMonth() === dayDate.getMonth() &&
+                            aDate.getFullYear() === dayDate.getFullYear();
+                    });
+                }
+
+                if (isRaceDay) {
+                    workout = {
+                        type: 'race',
+                        title: 'TOUR DES FLANDRES 2026',
+                        description: 'Le grand jour ! Pensez à l\'alimentation et profitez de l\'ambiance.',
+                        duration: '6h+',
+                        difficulty: 'Max',
+                        completed: !!completedActivity
+                    };
+                } else {
+                    const isTrainingDay = this.constraints.days.includes(dayIndex);
+
+                    if (isTrainingDay) {
+                        workout = this.getWorkoutForDay(dayIndex, phase);
+
+                        if (completedActivity) {
+                            workout.completed = true;
+                            workout.title = completedActivity.name; // Use actual name
+                            const dist = (completedActivity.distance / 1000).toFixed(1);
+                            const elev = Math.round(completedActivity.total_elevation_gain);
+                            workout.description = `Strava: ${dist}km | ${elev}m D+`;
+                            workout.duration = this.formatDuration(completedActivity.moving_time);
+                        } else if (isPast) {
+                            workout.completed = false;
+                            workout.title += ' (Manqué)';
+                            workout.type = 'missed';
+                        }
+                    } else if (completedActivity) {
+                        // Unplanned ride
+                        workout = {
+                            type: 'base',
+                            title: completedActivity.name,
+                            description: `Sortie libre: ${(completedActivity.distance / 1000).toFixed(1)}km | ${Math.round(completedActivity.total_elevation_gain)}m D+`,
+                            duration: this.formatDuration(completedActivity.moving_time),
+                            difficulty: 'N/A',
+                            completed: true
+                        };
+                    }
+                }
+
+                weekPlan.days.push({
+                    date: dayDate,
+                    dayName: daysOfWeek[dayIndex],
+                    workout: workout,
+                    isPast: isPast,
+                    isToday: isToday,
+                    isRaceDay: isRaceDay
                 });
             }
 
-            let workout = null;
-            if (isTrainingDay) {
-                workout = this.getWorkoutForDay(dayIndex);
+            plan.push(weekPlan);
 
-                if (completedActivity) {
-                    // Real activity found - use Strava data
-                    workout.completed = true;
-                    workout.title = completedActivity.name;
-                    workout.sport = completedActivity.type;
-                    const dist = (completedActivity.distance / 1000).toFixed(1);
-                    const elev = Math.round(completedActivity.total_elevation_gain);
-                    workout.description = `Strava: ${dist}km | ${elev}m D+`;
-                    workout.duration = this.formatDuration(completedActivity.moving_time);
-                } else if (isPast) {
-                    // Past day with no activity = missed
-                    workout.completed = false;
-                    workout.title += ' (Non réalisé)';
-                }
-            } else if (completedActivity) {
-                // Unplanned ride
-                workout = {
-                    type: 'base',
-                    title: completedActivity.name,
-                    sport: completedActivity.type,
-                    description: `Non planifié: ${(completedActivity.distance / 1000).toFixed(1)}km`,
-                    duration: this.formatDuration(completedActivity.moving_time),
-                    difficulty: 'N/A',
-                    completed: true
-                };
-            }
-
-            plan.push({
-                date: date,
-                dayName: daysOfWeek[dayIndex],
-                workout: workout,
-                isPast: isPast,
-                isToday: isToday
-            });
+            // Advance to next week
+            currentDay.setDate(currentDay.getDate() + 7);
+            weekCount++;
         }
 
         return plan;
+    }
+
+    getWorkoutForDay(dayIndex, phase) {
+        // Customize based on Phase
+
+        // Weekend Long Ride logic
+        if (dayIndex === 0 || dayIndex === 6) {
+            let duration = '3h00';
+            let desc = 'Endurance fondamentale (Z2).';
+            let title = 'Sortie Longue';
+
+            if (phase === 'BUILD') {
+                duration = '3h30 - 4h00';
+                desc = 'Endurance avec 3x15min tempo (Z3) dans les bosses.';
+                title = 'Endurance + Tempo';
+            } else if (phase === 'PEAK') { // Peak
+                duration = '4h00+';
+                desc = 'Simulation course. Enchaînement de bosses courtes à haute intensité.';
+                title = 'Simulation Flandrienne';
+            } else if (phase === 'TAPER') {
+                duration = '2h00';
+                desc = 'Sortie souple, quelques accélérations courtes pour débloquer.';
+                title = 'Maintien';
+            }
+
+            return {
+                type: 'long_ride',
+                title: title,
+                description: desc,
+                duration: duration,
+                difficulty: phase === 'TAPER' ? 'Faible' : 'Moyenne+ '
+            };
+        }
+
+        // Weekday Intervals (Tue/Thu)
+        if (dayIndex === 2 || dayIndex === 4) {
+            let workout = { type: 'intervals', duration: '1h00-1h30', difficulty: 'Elevée' };
+
+            if (phase === 'BASE') {
+                workout.title = 'Vélocité / Force';
+                workout.description = 'Travail de cadence (100rpm+) ou force (50rpm) en Z3.';
+            } else if (phase === 'BUILD') {
+                workout.title = 'Seuil (Z4)';
+                workout.description = '2 x 15min au seuil anaérobie. Récup 5min.';
+            } else if (phase === 'PEAK') {
+                workout.title = 'PMA / VO2 Max';
+                workout.description = 'Intervalles courts: 3 séries de (30s max / 30s récup) x 10.';
+            } else { // Taper
+                workout.title = 'Rappels d\'intensité';
+                workout.description = '2 x 5min au seuil. Reste très souple.';
+                workout.duration = '1h00';
+                workout.difficulty = 'Moyenne';
+            }
+            return workout;
+        }
+
+        // Other days (Mon/Wed/Fri) -> Recovery or HT
+        return {
+            type: 'base',
+            title: 'Récupération / Endurance',
+            description: 'Zone 1-2 stricte. Tournez les jambes.',
+            duration: '1h00 - 1h30',
+            difficulty: 'Faible'
+        };
+    }
+
+    renderSchedule(plan) {
+        if (this.schedulePlaceholder) this.schedulePlaceholder.classList.add('hidden');
+        if (this.calendarView) {
+            this.calendarView.classList.remove('hidden');
+            this.calendarView.innerHTML = ''; // Clear
+        }
+
+        const container = document.createElement('div');
+        container.className = 'schedule-container';
+
+        plan.forEach(week => {
+            const weekBlock = document.createElement('div');
+            weekBlock.className = 'week-block';
+
+            const startStr = week.weekStart.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+            const endStr = week.weekEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+
+            weekBlock.innerHTML = `
+                <div class="week-header">
+                    <span class="week-title">Semaine ${week.weekNumber}</span>
+                    <span class="week-dates">${startStr} - ${endStr}</span>
+                    <span class="phase-badge phase-${week.phase.toLowerCase()}">${week.phaseDesc}</span>
+                </div>
+                <div class="week-grid"></div>
+            `;
+
+            const grid = weekBlock.querySelector('.week-grid');
+
+            week.days.forEach(day => {
+                const dayCard = document.createElement('div');
+                dayCard.className = 'training-day-card';
+                if (day.isPast) dayCard.classList.add('day-past');
+                if (day.isToday) dayCard.classList.add('day-today');
+                if (day.isRaceDay) dayCard.classList.add('day-race');
+
+                const dayNumber = day.date.getDate();
+
+                let content = '';
+
+                if (day.workout) {
+                    let statusBadge = '';
+                    if (day.workout.completed) {
+                        statusBadge = '<span class="status-badge completed">✅</span>';
+                    } else if (day.workout.type === 'missed') {
+                        statusBadge = '<span class="status-badge missed">❌</span>';
+                    } else if (day.isRaceDay) {
+                        statusBadge = '🏁';
+                    }
+
+                    content = `
+                        <div class="day-header">
+                            <span class="day-name">${day.dayName}</span>
+                            <span class="day-date">${dayNumber}</span>
+                        </div>
+                        <div class="workout-details">
+                            <div class="workout-meta">
+                                <span class="workout-type ${day.workout.type}">${day.workout.title}</span>
+                                ${statusBadge}
+                            </div>
+                            <p class="workout-desc">${day.workout.description}</p>
+                            <div class="workout-duration">${day.workout.duration || ''}</div>
+                        </div>
+                    `;
+                } else {
+                    content = `
+                        <div class="day-header">
+                            <span class="day-name">${day.dayName}</span>
+                            <span class="day-date">${dayNumber}</span>
+                        </div>
+                        <div class="workout-details">
+                            <span class="workout-type rest">Repos</span>
+                        </div>
+                    `;
+                }
+
+                dayCard.innerHTML = content;
+                grid.appendChild(dayCard);
+            });
+
+            container.appendChild(weekBlock);
+        });
+
+        this.calendarView.appendChild(container);
     }
 
     formatDuration(seconds) {
@@ -445,126 +560,41 @@ class TrainingManager {
         return prevMonday;
     }
 
-    getWorkoutForDay(dayIndex) {
-        // Simple logic for Tour des Flandres Prep
-        // Weekend: Long Ride (Endurance/Cobbles simulation)
-        // Weekdays: Intervals or Recovery
-
-        if (dayIndex === 0 || dayIndex === 6) { // Weekend
-            return {
-                type: 'long_ride',
-                title: 'Sortie Longue - Endurance',
-                sport: 'Ride',
-                description: 'Focus sur l\'endurance fondamentale. Intégrez des sections pavées ou des chemins si possible. Cadence 85-95 rpm.',
-                duration: '3h00 - 4h00',
-                difficulty: 'Moyenne',
-                completed: false
-            };
-        } else if (dayIndex === 2 || dayIndex === 4) { // Tue/Thu -> Intensity
-            return {
-                type: 'intervals',
-                title: 'Intervalles au Seuil',
-                sport: 'Ride',
-                description: 'Echauffement 20min. 3 x 10min au seuil (Z4) avec 5min de récupération. Retour au calme 15min.',
-                duration: '1h30',
-                difficulty: 'Elevée',
-                completed: false
-            };
-        } else {
-            return {
-                type: 'base',
-                title: 'Endurance de Base',
-                sport: 'Ride',
-                description: 'Sortie souple pour accumuler du volume sans fatigue excessive. Restez en Z2.',
-                duration: '2h00',
-                difficulty: 'Faible',
-                completed: false
-            };
-        }
-    }
-
-    renderSchedule(plan) {
-        this.schedulePlaceholder.classList.add('hidden');
-        this.calendarView.classList.remove('hidden');
-        this.calendarView.innerHTML = '';
-
-        plan.forEach(day => {
-            const card = document.createElement('div');
-            card.className = 'training-day-card';
-            if (day.isPast) card.classList.add('day-past');
-            if (day.isToday) card.classList.add('day-today');
-
-            const dayNumber = day.date.getDate();
-
-            let statusBadge = '';
-            if (day.workout && day.workout.completed) {
-                statusBadge = '<span class="status-badge completed">✅ Réalisé</span>';
-            } else if (day.workout) {
-                statusBadge = '<span class="status-badge planned">📅 Prévu</span>';
-            }
-
-            if (day.workout) {
-                card.innerHTML = `
-                    <div class="day-header">
-                        <span class="day-name">${day.dayName}</span>
-                        <span class="day-date">${dayNumber}</span>
-                    </div>
-                    <div class="workout-details">
-                        <div class="workout-meta">
-                            <span class="workout-sport-icon" style="margin-right: 8px; font-size: 1.2em;">${this.sportIcons[day.workout.sport] || '🏅'}</span>
-                            <span class="workout-type ${day.workout.sport === 'Run' ? 'run' : day.workout.type}">${day.workout.title}</span>
-                            ${statusBadge}
-                        </div>
-                        <p class="workout-desc">${day.workout.description}</p>
-                        <div class="workout-duration">${day.workout.duration}</div>
-                    </div>
-                `;
-            } else {
-                card.innerHTML = `
-                    <div class="day-header">
-                        <span class="day-name">${day.dayName}</span>
-                        <span class="day-date">${dayNumber}</span>
-                    </div>
-                    <div class="workout-details">
-                        <span class="workout-type rest">Repos</span>
-                        <p class="workout-desc">Récupération complète. Hydratez-vous bien.</p>
-                    </div>
-                `;
-            }
-
-            this.calendarView.appendChild(card);
-        });
+    getWeekNumber(d) {
+        // ISO week date helpers could be used, but rough counter is fine for this context
+        return 0; // Not critical for display, we use loop index
     }
 
     showNotification(message) {
         // Simple alert for now, could be a toast
-        alert(message);
+        // alert(message); // Annoying if frequent
+        console.log(message);
     }
 }
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if manager is already initialized or needs to be (tab is active)
-    const trainingTab = document.getElementById('training-plan');
-    if (trainingTab && trainingTab.classList.contains('active')) {
+    setupTabNavigation();
+
+    // Init Manager if tab is active OR on click
+    const trainingTabBtn = document.querySelector('button[data-tab="training-plan"]');
+    const trainingContent = document.getElementById('training-plan');
+
+    const ensureManager = () => {
         if (!window.trainingManager) {
+            console.log('Initializing TrainingManager...');
             window.trainingManager = new TrainingManager();
         }
-    }
-
-    // Handle Tab Switching globally (since it affects this module)
-    const trainingTabBtn = document.querySelector('button[data-tab="training-plan"]');
+    };
 
     if (trainingTabBtn) {
-        trainingTabBtn.addEventListener('click', () => {
-            // Check if manager is already initialized
-            if (!window.trainingManager) {
-                window.trainingManager = new TrainingManager();
-            }
-        });
+        trainingTabBtn.addEventListener('click', ensureManager);
     }
 
-    setupTabNavigation();
+    // Auto-init if already active (default state)
+    if (trainingContent && trainingContent.classList.contains('active')) {
+        ensureManager();
+    }
 });
 
 function setupTabNavigation() {

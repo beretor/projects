@@ -602,24 +602,25 @@
             <div class="calculator-grid">
                 <section class="card input-card">
                     <h2 class="card-title">
-                        Connectivité
+                        🔗 Connexion Strava
                     </h2>
                     <div class="strava-connect-container">
-                        <div class="strava-intro">
-                            <p>Connectez votre compte Strava pour importer vos activités et générer un programme
-                                personnalisé.</p>
-                        </div>
+                        <p class="connect-description">Connectez votre compte Strava pour synchroniser vos activités et
+                            générer un plan d'entraînement personnalisé.</p>
 
-
-                        <button id="connectStravaBtn" class="strava-btn">
-                            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                        <button id="connectStravaBtn" class="strava-btn strava-btn-large">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
                                 <path
                                     d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L15.387 0 10.537 9.574h4.844" />
                             </svg>
                             Connecter avec Strava
                         </button>
-                        <p id="stravaStatus" class="strava-status hidden">✅ Données synchronisées</p>
+
+                        <p id="stravaStatus" class="strava-status hidden">✅ Connecté</p>
                         <p id="stravaError" class="strava-error hidden">❌ Erreur de connexion</p>
+
+                        <!-- Hidden input for backward compatibility/storage -->
+                        <input type="hidden" id="stravaToken">
                     </div>
                 </section>
 
@@ -754,100 +755,35 @@
                     </div>
                 </section>
 
-                <section class="card results-card last-week-card" id="lastWeekCard">
+                <section class="card results-card history-card" id="historyCard">
                     <h2 class="card-title">
-                        📊 Bilan Semaine Dernière
+                        📜 Historique des Activités (30 jours)
                     </h2>
 
-                    <div id="lastWeekPlaceholder" class="results-placeholder">
+                    <div id="historyPlaceholder" class="results-placeholder">
                         <div class="placeholder-icon">🔗</div>
-                        <p>Connectez Strava pour voir votre bilan.</p>
+                        <p>Connectez Strava pour voir vos activités récentes.</p>
                     </div>
 
-                    <div id="lastWeekContent" class="hidden">
-                        <!-- Stats summary -->
-                        <div class="stats-summary">
-                            <div class="stat-item">
-                                <span class="stat-value" id="lastWeekDist">0</span>
-                                <span class="stat-label">km</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-value" id="lastWeekTime">0h00</span>
-                                <span class="stat-label">heures</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-value" id="lastWeekElev">0</span>
-                                <span class="stat-label">m D+</span>
-                            </div>
-                        </div>
-
-                        <div class="activity-list" id="lastWeekActivitiesList">
-                            <!-- Injected JS -->
+                    <div id="historyContent" class="hidden">
+                        <div class="table-container">
+                            <table class="activity-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Activité</th>
+                                        <th>Distance</th>
+                                        <th>D+</th>
+                                        <th>Temps</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyTableBody">
+                                    <!-- Activities will be injected here -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </section>
-
-                <section class="card training-card">
-                    <h2 class="card-title">
-                        📅 Plan d'Entrainement - Tour des Flandres (5 Avril)
-                    </h2>
-
-                    <div class="training-controls">
-                        <div class="toggle-group" id="trainingToggles">
-                            <button class="toggle-btn active" data-filter="all">Tout</button>
-                            <button class="toggle-btn" data-filter="key">Clés</button>
-                            <button class="toggle-btn" data-filter="recovery">Récup</button>
-                        </div>
-                    </div>
-
-                    <div class="training-table-wrapper">
-                        <table class="training-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Type</th>
-                                    <th>Séance</th>
-                                    <th>MyWhoosh</th>
-                                </tr>
-                            </thead>
-                            <tbody id="trainingTableBody">
-                                <!-- Training items will be injected here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-                <div class="stats-grid">
-                    <div class="stat-card distance">
-                        <div class="stat-icon">🛣️</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="lastWeekDist">--</span>
-                            <span class="stat-unit">km</span>
-                        </div>
-                        <span class="stat-label">Distance</span>
-                    </div>
-                    <div class="stat-card time">
-                        <div class="stat-icon">⏱️</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="lastWeekTime">--</span>
-                        </div>
-                        <span class="stat-label">Temps en selle</span>
-                    </div>
-                    <div class="stat-card elevation">
-                        <div class="stat-icon">⛰️</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="lastWeekElev">--</span>
-                            <span class="stat-unit">m</span>
-                        </div>
-                        <span class="stat-label">Dénivelé</span>
-                    </div>
-                    <div class="stat-card activities">
-                        <div class="stat-icon">🚴</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="lastWeekCount">--</span>
-                        </div>
-                        <span class="stat-label">Sorties</span>
-                    </div>
-                </div>
 
                 <div class="activities-section">
                     <h3 class="section-subtitle">Détail des activités</h3>
@@ -856,36 +792,6 @@
                     </div>
                 </div>
             </div>
-            </section>
-
-            <section class="card training-card">
-                <h2 class="card-title">
-                    📅 Plan d'Entrainement - Tour des Flandres (5 Avril)
-                </h2>
-
-                <div class="training-controls">
-                    <div class="toggle-group" id="trainingToggles">
-                        <button class="toggle-btn active" data-filter="all">Tout</button>
-                        <button class="toggle-btn" data-filter="key">Clés</button>
-                        <button class="toggle-btn" data-filter="recovery">Récup</button>
-                    </div>
-                </div>
-
-                <div class="training-table-wrapper">
-                    <table class="training-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Type</th>
-                                <th>Séance</th>
-                                <th>MyWhoosh</th>
-                            </tr>
-                        </thead>
-                        <tbody id="trainingTableBody">
-                            <!-- Training items will be injected here -->
-                        </tbody>
-                    </table>
-                </div>
             </section>
 
             <section class="card results-card" id="scheduleCard">
@@ -913,10 +819,9 @@
         </div>
     </main>
 
-    <script src="app.js"></script>
-    <script src="pressure.js"></script>
-    <script src="planning.js"></script>
-    <script src="training.js"></script>
+    <script src="app.js?v=3"></script>
+    <script src="pressure.js?v=3"></script>
+    <script src="planning.js?v=3"></script>
 </body>
 
 </html>
