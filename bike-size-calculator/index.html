@@ -619,6 +619,10 @@
                         <p id="stravaStatus" class="strava-status hidden">✅ Connecté</p>
                         <p id="stravaError" class="strava-error hidden">❌ Erreur de connexion</p>
 
+                        <button id="disconnectStravaBtn" class="strava-btn disconnect-btn hidden">
+                            Se déconnecter
+                        </button>
+
                         <!-- Hidden input for backward compatibility/storage -->
                         <input type="hidden" id="stravaToken">
                     </div>
@@ -809,13 +813,22 @@
             </section>
         </div>
 
-        <button class="calculate-btn" id="generateScheduleBtn">
-            <span>Générer mon programme</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path
-                    d="M19 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zm-7 15l-5-5 1.41-1.41L12 16.17l7.59-7.59L21 10l-9 9z" />
-            </svg>
-        </button>
+        <div class="planning-actions">
+            <button class="calculate-btn" id="generateScheduleBtn">
+                <span>Générer mon programme</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M19 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zm-7 15l-5-5 1.41-1.41L12 16.17l7.59-7.59L21 10l-9 9z" />
+                </svg>
+            </button>
+            <button class="calculate-btn garmin-btn hidden" id="syncGarminBtn">
+                <span>Envoyer vers Garmin</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 3v9l4 4" />
+                </svg>
+            </button>
+        </div>
         </div>
     </main>
 

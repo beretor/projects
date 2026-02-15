@@ -808,43 +808,110 @@ body {
    ============================ */
 .table-container {
     overflow-x: auto;
-    margin-top: 1rem;
+    margin: 1rem auto 0;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    max-width: 100%;
 }
 
 .activity-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
+    /* 13px */
     text-align: left;
+    table-layout: fixed;
 }
 
 .activity-table th {
     font-weight: 600;
     color: var(--color-text-muted);
-    padding: 1rem;
+    padding: 0.875rem 1rem;
     border-bottom: 2px solid var(--color-border);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    font-size: 0.7rem;
+    background-color: var(--color-bg-alt);
+    white-space: nowrap;
 }
 
+/* Column widths for fixed layout */
+.activity-table th:nth-child(1) {
+    width: 18%;
+}
+
+/* Date */
+.activity-table th:nth-child(2) {
+    width: 38%;
+}
+
+/* Activité */
+.activity-table th:nth-child(3) {
+    width: 15%;
+}
+
+/* Distance */
+.activity-table th:nth-child(4) {
+    width: 12%;
+}
+
+/* D+ */
+.activity-table th:nth-child(5) {
+    width: 17%;
+}
+
+/* Temps */
+
 .activity-table td {
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--color-border);
     color: var(--color-text);
+    transition: background-color var(--transition-fast);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .activity-table tr:last-child td {
     border-bottom: none;
 }
 
-.activity-table tr:hover {
+.activity-table tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.015);
+}
+
+.activity-table tr:hover td {
     background-color: var(--color-bg-alt);
 }
 
 /* Activity Type Icons in Table */
 .activity-icon {
+    display: inline-block;
     margin-right: 0.5rem;
+    font-size: 1.1em;
+}
+
+/* Button to show more activities */
+.btn-text-only {
+    display: block;
+    margin: 1.5rem auto 0;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.btn-text-only:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 4px;
 }
 
 /* Responsive Table */
@@ -852,13 +919,30 @@ body {
 
     .activity-table th,
     .activity-table td {
-        padding: 0.75rem 0.5rem;
+        padding: 0.625rem 0.5rem;
+        font-size: 0.75rem;
     }
 
     .activity-table th:nth-child(4),
     .activity-table td:nth-child(4) {
         display: none;
         /* Hide Elevation on very small screens */
+    }
+
+    .activity-table th:nth-child(1) {
+        width: 22%;
+    }
+
+    .activity-table th:nth-child(2) {
+        width: 38%;
+    }
+
+    .activity-table th:nth-child(3) {
+        width: 20%;
+    }
+
+    .activity-table th:nth-child(5) {
+        width: 20%;
     }
 }
 
@@ -1695,6 +1779,12 @@ body {
     margin-bottom: 0.75rem;
     border-radius: 100px;
     letter-spacing: 0.05em;
+    max-width: 100%;
+    text-align: center;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .workout-type.rest {
@@ -1824,6 +1914,8 @@ body {
 
 .table-container {
     overflow-x: auto;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .activities-table {
@@ -2137,4 +2229,285 @@ body {
 .workout-type.swim {
     background: #00bcd4;
     color: white;
+}
+
+/* ============================
+   Future Schedule - Weekly Grid
+   ============================ */
+.schedule-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin: 1.5rem auto 0;
+    max-width: 100%;
+}
+
+.week-block {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    overflow-x: auto;
+}
+
+.week-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.week-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.week-dates {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.phase-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.phase-base {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.phase-build {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.phase-peak {
+    background: #fce4ec;
+    color: #c2185b;
+}
+
+.phase-taper {
+    background: #e8f5e9;
+    color: #388e3c;
+}
+
+.week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(130px, 1fr));
+    gap: 0.5rem;
+}
+
+/* Day Card Styles */
+.training-day-card {
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.625rem;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.training-day-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-text-subtle);
+    z-index: 10;
+}
+
+.training-day-card.day-past {
+    opacity: 0.6;
+    background: #f0f0f0;
+}
+
+.training-day-card.day-today {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.training-day-card.day-race {
+    background: #fff8e1;
+    border-color: #ffc107;
+}
+
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.workout-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.workout-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.25rem;
+}
+
+/* Divider between multiple workouts in same day */
+.workout-divider {
+    border: none;
+    border-top: 1px dashed var(--color-border);
+    margin: 0.375rem 0;
+}
+
+/* Override pill badge style inside day cards */
+.training-day-card .workout-type {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.35;
+    text-transform: none;
+    background: none;
+    border-radius: 0;
+    padding: 0;
+    margin-bottom: 0;
+    letter-spacing: 0;
+    white-space: normal;
+    overflow: visible;
+}
+
+.training-day-card .workout-type.rest {
+    color: var(--color-text-subtle);
+    font-weight: 400;
+    font-style: italic;
+}
+
+.training-day-card .workout-type.long_ride,
+.training-day-card .workout-type.intervals {
+    background: none;
+    color: var(--color-text);
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.workout-desc {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    line-height: 1.35;
+    margin-top: 0.25rem;
+}
+
+.workout-duration {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--color-text);
+    margin-top: auto;
+    padding-top: 0.25rem;
+}
+
+/* Responsive Grid */
+@media (max-width: 900px) {
+    .week-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .training-day-card {
+        min-height: 100px;
+    }
+}
+
+@media (max-width: 600px) {
+    .week-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .week-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .training-day-card {
+        min-height: 90px;
+        padding: 0.5rem;
+    }
+
+    .workout-type {
+        font-size: 0.6rem;
+    }
+
+    .workout-desc {
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+}
+
+/* Garmin Button & Planning Actions */
+.planning-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    width: 100%;
+}
+
+.planning-actions .calculate-btn {
+    flex: 1;
+    margin-top: 0;
+}
+
+.garmin-btn {
+    background: linear-gradient(135deg, #007cc3 0%, #005a8c 100%) !important;
+    box-shadow: 0 4px 15px rgba(0, 124, 195, 0.3) !important;
+}
+
+.garmin-btn:hover {
+    background: linear-gradient(135deg, #008be0 0%, #006eb1 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 124, 195, 0.4) !important;
+}
+
+.garmin-btn.syncing {
+    opacity: 0.7;
+    cursor: wait;
+    pointer-events: none;
+}
+
+.garmin-btn.syncing span::after {
+    content: '...';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+
+    0%,
+    20% {
+        content: '';
+    }
+
+    40% {
+        content: '.';
+    }
+
+    60% {
+        content: '..';
+    }
+
+    80% {
+        content: '...';
+    }
 }

@@ -11,6 +11,7 @@ import os
 import urllib.parse
 import urllib.request
 import webbrowser
+import sys
 from pathlib import Path
 
 # ⚠️ CONFIGURE THESE WITH YOUR STRAVA API CREDENTIALS
@@ -20,6 +21,11 @@ REDIRECT_URI = "http://localhost:8000/oauth/callback"
 
 PORT = 8000
 STATIC_DIR = Path(__file__).parent
+
+
+class RobustHTTPServer(http.server.HTTPServer):
+    """Server that allows address reuse."""
+    allow_reuse_address = True
 
 
 class OAuthHandler(http.server.SimpleHTTPRequestHandler):
@@ -41,9 +47,49 @@ class OAuthHandler(http.server.SimpleHTTPRequestHandler):
         elif parsed.path == "/api/token":
             # Return stored token
             self.serve_token()
+        elif parsed.path == "/api/logout":
+            # Handle logout
+            self.handle_logout()
+        elif parsed.path == "/api/garmin/sync":
+            # Garmin Sync is POST only for safety/cleanliness, 
+            # but I'll return 405 if GET.
+            self.send_error(405, "Method Not Allowed")
         else:
             # Serve static files
             super().do_GET()
+
+    def do_POST(self):
+        parsed = urllib.parse.urlparse(self.path)
+        print(f"DEBUG: POST Request path: {parsed.path}")
+
+        if parsed.path == "/api/garmin/sync":
+            self.handle_garmin_sync()
+        else:
+            self.send_error(404, "Not Found")
+
+    def handle_garmin_sync(self):
+        """Handle Garmin workout sync request."""
+        try:
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            plan_data = json.loads(post_data.decode('utf-8'))
+
+            import garmin_sync
+            result = garmin_sync.sync_workouts(plan_data)
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(result).encode())
+
+        except Exception as e:
+            print(f"ERROR in garmin sync: {e}")
+            self.send_response(500)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": str(e)}).encode())
 
     def redirect_to_strava(self):
         """Redirect user to Strava authorization page."""
@@ -105,7 +151,7 @@ class OAuthHandler(http.server.SimpleHTTPRequestHandler):
             json.dump(token_data, f)
 
     def serve_token(self):
-        """Serve the stored token via API."""
+        """Serve the stored token via API, refreshing if expired."""
         token_file = STATIC_DIR / ".strava_token.json"
         
         self.send_response(200)
@@ -113,11 +159,76 @@ class OAuthHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
 
-        if token_file.exists():
-            with open(token_file) as f:
-                self.wfile.write(f.read().encode())
-        else:
+        if not token_file.exists():
             self.wfile.write(b'{"error": "No token stored"}')
+            return
+
+        try:
+            with open(token_file, "r") as f:
+                token_data = json.load(f)
+
+            # Check expiration (expires_at is unix timestamp)
+            # Refresh if expired or will expire in < 5 minutes
+            import time
+            expires_at = token_data.get("expires_at", 0)
+            now = time.time()
+            
+            if now + 300 > expires_at:
+                print("DEBUG: Token expired or expiring soon. Refreshing...")
+                refresh_token = token_data.get("refresh_token")
+                if refresh_token:
+                    new_token_data = self.refresh_access_token(refresh_token)
+                    if new_token_data and "access_token" in new_token_data:
+                        # Merge new data (sometimes refresh response doesn't include athlete)
+                        token_data.update(new_token_data)
+                        self.save_token(token_data)
+                        print("DEBUG: Token refreshed successfully.")
+                    else:
+                         print("ERROR: Failed to refresh token.")
+            
+            self.wfile.write(json.dumps(token_data).encode())
+
+        except Exception as e:
+            print(f"ERROR serving token: {e}")
+            self.wfile.write(b'{"error": "Internal Server Error"}')
+
+    def handle_logout(self):
+        """Delete user token to log out."""
+        token_file = STATIC_DIR / ".strava_token.json"
+        try:
+            if token_file.exists():
+                os.remove(token_file)
+                print("DEBUG: Token file deleted.")
+            
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b'{"status": "logged_out"}')
+        except Exception as e:
+            print(f"ERROR logging out: {e}")
+            self.send_error(500, f"Error deleting token: {e}")
+
+    def refresh_access_token(self, refresh_token):
+        """Use refresh_token to get a new access_token."""
+        try:
+            data = urllib.parse.urlencode({
+                "client_id": CLIENT_ID,
+                "client_secret": CLIENT_SECRET,
+                "refresh_token": refresh_token,
+                "grant_type": "refresh_token"
+            }).encode()
+
+            req = urllib.request.Request(
+                "https://www.strava.com/oauth/token",
+                data=data,
+                method="POST"
+            )
+
+            with urllib.request.urlopen(req) as response:
+                return json.loads(response.read().decode())
+        except Exception as e:
+            print(f"ERROR refreshing token: {e}")
+            return None
 
     def send_success_page(self, token_data):
         """Send success page that auto-closes and updates the app."""
@@ -237,11 +348,19 @@ def main():
     print(f"🔐 OAuth callback at {REDIRECT_URI}")
     print(f"\nPress Ctrl+C to stop.\n")
 
-    with http.server.HTTPServer(("", PORT), OAuthHandler) as httpd:
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            print("\n👋 Server stopped.")
+    try:
+        with RobustHTTPServer(("", PORT), OAuthHandler) as httpd:
+            try:
+                httpd.serve_forever()
+            except KeyboardInterrupt:
+                print("\n👋 Server stopped.")
+    except OSError as e:
+        if e.errno == 48:
+            print(f"❌ Error: Port {PORT} is already in use.")
+            print(f"💡 Try running: lsof -i :{PORT} to find the process ID, then kill it.")
+            sys.exit(1)
+        else:
+            raise
 
 
 if __name__ == "__main__":

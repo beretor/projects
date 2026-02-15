@@ -1,0 +1,167 @@
+[
+    {
+        "week": 1,
+        "focus": "Semaine 5 km - Fun & Technique",
+        "days": [
+            {
+                "day": "Mon",
+                "date": "17/11",
+                "type": "Rest",
+                "title": "-",
+                "details": ""
+            },
+            {
+                "day": "Tue",
+                "date": "18/11",
+                "type": "Rest",
+                "title": "-",
+                "details": ""
+            },
+            {
+                "day": "Wed",
+                "date": "19/11",
+                "type": "Rest",
+                "title": "-",
+                "details": ""
+            },
+            {
+                "day": "Thu",
+                "date": "20/11",
+                "type": "Speed",
+                "title": "Technique & Strides",
+                "details": "15’ Easy Jog + 4x Strides (Run tall and relaxed)."
+            },
+            {
+                "day": "Fri",
+                "date": "21/11",
+                "type": "Rest",
+                "title": "Rest",
+                "details": "Rest or play other sports."
+            },
+            {
+                "day": "Sat",
+                "date": "22/11",
+                "type": "Easy",
+                "title": "Shakeout",
+                "details": "15’ Easy run + Stretching."
+            },
+            {
+                "day": "Sun",
+                "date": "23/11",
+                "type": "Race",
+                "title": "5 km Race",
+                "details": "Run by feel. Start steady, finish with a smile!"
+            }
+        ]
+    },
+    {
+        "week": 2,
+        "focus": "Training Week - Speed Games",
+        "days": [
+            {
+                "day": "Mon",
+                "date": "24/11",
+                "type": "Easy",
+                "title": "Easy Run",
+                "details": "30’ Jog. Chatty pace."
+            },
+            {
+                "day": "Tue",
+                "date": "25/11",
+                "type": "Speed",
+                "title": "Speed Games",
+                "details": "8x Short Hill Sprints (30s) OR 200m Relays. Walk back recovery."
+            },
+            {
+                "day": "Wed",
+                "date": "26/11",
+                "type": "Rest",
+                "title": "Rest",
+                "details": "Rest day."
+            },
+            {
+                "day": "Thu",
+                "date": "27/11",
+                "type": "Tempo",
+                "title": "Steady Running",
+                "details": "3x 4’ Steady pace (not hard). 2’ Walk/Jog rest."
+            },
+            {
+                "day": "Fri",
+                "date": "28/11",
+                "type": "Rest",
+                "title": "Rest",
+                "details": "Rest."
+            },
+            {
+                "day": "Sat",
+                "date": "29/11",
+                "type": "Rest",
+                "title": "Active Fun",
+                "details": "Bike ride, swim, or hike."
+            },
+            {
+                "day": "Sun",
+                "date": "30/11",
+                "type": "Long",
+                "title": "Long Run",
+                "details": "8 km Run/Walk. Take breaks if needed."
+            }
+        ]
+    },
+    {
+        "week": 3,
+        "focus": "Race Week - 10km Challenge",
+        "days": [
+            {
+                "day": "Mon",
+                "date": "01/12",
+                "type": "Easy",
+                "title": "Easy Run",
+                "details": "25’ Easy Jog."
+            },
+            {
+                "day": "Tue",
+                "date": "02/12",
+                "type": "Speed",
+                "title": "Fast Feet",
+                "details": "5x 100m Fast (not sprint). Focus on turnover."
+            },
+            {
+                "day": "Wed",
+                "date": "03/12",
+                "type": "Rest",
+                "title": "Rest",
+                "details": "Rest."
+            },
+            {
+                "day": "Thu",
+                "date": "04/12",
+                "type": "Easy",
+                "title": "Short Run",
+                "details": "20’ Easy + 2 Strides."
+            },
+            {
+                "day": "Fri",
+                "date": "05/12",
+                "type": "Rest",
+                "title": "Rest",
+                "details": "Rest & Hydrate."
+            },
+            {
+                "day": "Sat",
+                "date": "06/12",
+                "type": "Easy",
+                "title": "Shakeout",
+                "details": "10’ Jog + Stretching."
+            },
+            {
+                "day": "Sun",
+                "date": "07/12",
+                "type": "Race",
+                "title": "10 km Challenge",
+                "details": "Goal: Finish Strong. Pacing: 45-50 mins (approx)."
+            }
+        ]
+    }
+]
