@@ -450,12 +450,13 @@ class TrainingManager {
 
                         if (commutes.length > 0) {
                             const totalDist = commutes.reduce((sum, a) => sum + a.distance, 0);
+                            const totalDistKm = (totalDist / 1000).toFixed(1);
                             const totalTime = commutes.reduce((sum, a) => sum + a.moving_time, 0);
                             workouts.push({
                                 type: 'commute',
                                 sport: 'ride',
-                                title: commutes.length > 1 ? 'Vélotaf (A/R)' : 'Vélotaf',
-                                description: `${(totalDist / 1000).toFixed(1)}km total`,
+                                title: commutes.length > 1 ? `Vélotaf (A/R - ${totalDistKm}km)` : `Vélotaf (${totalDistKm}km)`,
+                                description: `${totalDistKm}km total`,
                                 duration: this.formatDuration(totalTime),
                                 completed: true
                             });
@@ -509,7 +510,7 @@ class TrainingManager {
                             workouts.push({
                                 type: 'commute',
                                 sport: 'ride',
-                                title: 'Vélotaf (Z2)',
+                                title: `Vélotaf (${dist}km)`,
                                 description: `Entraînement Z2 | ${dist}km A/R`,
                                 duration: 'Prévu',
                                 difficulty: 'Faible',
