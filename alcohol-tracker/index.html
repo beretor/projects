@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dry Days</title>
+    <meta name="description" content="Suivez votre consommation d'alcool">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Dry Days">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <main class="container">
+
+        <header class="header">
+            <h1>Dry Days</h1>
+            <p class="tagline">Suivi de consommation</p>
+        </header>
+
+        <!-- Saisie du jour -->
+        <section class="today-section">
+            <div class="today-meta">
+                <span class="today-date" id="today-date"></span>
+                <span class="today-status" id="today-status">Non saisi</span>
+            </div>
+
+            <div class="today-actions">
+                <button class="btn btn-dry" id="btn-dry">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Jour sans alcool
+                </button>
+
+                <div class="btn-drinks-group">
+                    <button class="btn btn-drinks" id="btn-drinks">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M9 3H5l1 9h12l1-9h-4M9 3h6M8 12c0 3.314 1.79 6 4 6s4-2.686 4-6"/>
+                        </svg>
+                        J'ai bu
+                    </button>
+                    <div class="drinks-input" id="drinks-input">
+                        <button class="count-btn" id="count-minus">−</button>
+                        <span class="count-display">
+                            <span class="count-value" id="count-value">1</span>
+                            <span class="count-unit">verre(s)</span>
+                        </span>
+                        <button class="count-btn" id="count-plus">+</button>
+                        <button class="btn btn-confirm" id="btn-confirm">OK</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="stats-section">
+            <div class="stat-card">
+                <span class="stat-value" id="stat-dry-month">—</span>
+                <span class="stat-label">jours secs<br>ce mois</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-card">
+                <span class="stat-value" id="stat-glasses-month">—</span>
+                <span class="stat-label">verres<br>ce mois</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-card">
+                <span class="stat-value" id="stat-streak">—</span>
+                <span class="stat-label">jours secs<br>d'affilée</span>
+            </div>
+        </section>
+
+        <!-- Toggle vue -->
+        <div class="view-toggle">
+            <button class="toggle-btn active" id="toggle-month">Mois</button>
+            <button class="toggle-btn" id="toggle-year">Année</button>
+        </div>
+
+        <!-- Vue mensuelle -->
+        <section class="calendar-section" id="view-month">
+            <div class="calendar-nav">
+                <button class="nav-btn" id="prev-month">←</button>
+                <span class="calendar-title" id="month-title"></span>
+                <button class="nav-btn" id="next-month">→</button>
+            </div>
+            <div class="calendar-grid" id="calendar-month"></div>
+        </section>
+
+        <!-- Vue annuelle -->
+        <section class="calendar-section hidden" id="view-year">
+            <div class="calendar-nav">
+                <button class="nav-btn" id="prev-year">←</button>
+                <span class="calendar-title" id="year-title"></span>
+                <button class="nav-btn" id="next-year">→</button>
+            </div>
+            <div class="year-grid" id="calendar-year"></div>
+        </section>
+
+        <!-- Légende -->
+        <div class="legend">
+            <span class="legend-item"><span class="dot dot-dry"></span>Jour sec</span>
+            <span class="legend-item"><span class="dot dot-light"></span>1–2 verres</span>
+            <span class="legend-item"><span class="dot dot-heavy"></span>3+ verres</span>
+            <span class="legend-item"><span class="dot dot-none"></span>Non saisi</span>
+        </div>
+
+        <!-- Notifications -->
+        <div class="notif-section">
+            <button class="btn-notif" id="btn-notif">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                Activer le rappel 21h
+            </button>
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
