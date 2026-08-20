@@ -27,11 +27,17 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v4
+      - name: Assemble site
+        run: |
+          mkdir -p dist
+          cp -r bike-size-calculator/. dist/
+          mkdir -p dist/photo-album
+          cp -r photo-album/. dist/photo-album/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload bike-size-calculator folder
-          path: './bike-size-calculator'
+          # bike-size-calculator stays at the site root, photo-album is published under /photo-album/
+          path: './dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
