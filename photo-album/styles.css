@@ -1,0 +1,193 @@
+:root {
+  --sand: #f4ede1;
+  --sand-dark: #e6d9c4;
+  --teal: #1f6f6b;
+  --teal-dark: #17524f;
+  --coral: #e8734a;
+  --ink: #3a332a;
+  --card-bg: #ffffff;
+  --shadow: 0 6px 18px rgba(58, 51, 42, 0.12);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: linear-gradient(180deg, var(--sand) 0%, var(--sand-dark) 100%);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--sand-dark);
+}
+
+.brand {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--teal-dark);
+}
+
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.btn {
+  border: 1px solid var(--sand-dark);
+  background: #fff;
+  color: var(--ink);
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+.btn:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+.btn-primary { background: var(--teal); color: #fff; border-color: var(--teal); }
+.btn-primary:hover { background: var(--teal-dark); }
+.btn-danger { color: #b3492f; border-color: #e8b6a4; }
+.btn-danger:hover { background: #fbeae3; }
+
+.album {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.cover {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.cover-title {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--teal-dark);
+  font-family: Georgia, "Times New Roman", serif;
+  padding: 6px 4px;
+}
+.cover-title::placeholder { color: #9c9182; }
+
+.cover-subtitle {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-size: 1.05rem;
+  color: var(--coral);
+  padding: 2px 4px;
+  margin-top: 4px;
+}
+.cover-subtitle::placeholder { color: #c9a696; }
+
+.cover-title:focus, .cover-subtitle:focus { outline: none; border-bottom: 1px dashed var(--sand-dark); }
+
+.dropzone {
+  border: 2px dashed var(--sand-dark);
+  border-radius: var(--radius);
+  padding: 22px;
+  text-align: center;
+  color: #8a7f6d;
+  margin-bottom: 28px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.dropzone.dragover {
+  background: #fff;
+  border-color: var(--teal);
+  color: var(--teal-dark);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 22px;
+}
+
+.card {
+  margin: 0;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  cursor: grab;
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+.card:active { cursor: grabbing; }
+.card.dragging { opacity: 0.4; }
+.card.drag-over { outline: 2px solid var(--coral); outline-offset: -2px; }
+
+.card-img-wrap {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--sand-dark);
+}
+.card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.card figcaption { padding: 10px 12px; }
+
+.card-caption {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  color: var(--ink);
+  padding: 2px 0;
+}
+.card-caption::placeholder { color: #b6ab98; }
+.card-caption:focus { outline: none; }
+
+.card-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+}
+.card-remove:hover { background: var(--coral); }
+
+.empty-state {
+  text-align: center;
+  color: #9c9182;
+  margin-top: 60px;
+  font-size: 1.05rem;
+}
+.grid:not(:empty) + .empty-state,
+.grid:empty ~ .empty-state {
+  display: none;
+}
+#grid:empty ~ #emptyState { display: block; }
+#grid:not(:empty) ~ #emptyState { display: none; }
+
+@media print {
+  .no-print { display: none !important; }
+  .dropzone { display: none !important; }
+  body { background: #fff; }
+  .album { max-width: 100%; padding: 0; }
+  .card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+  .grid { gap: 14px; }
+  .cover-title, .cover-subtitle { color: #000 !important; }
+}
