@@ -1,9 +1,9 @@
 (() => {
-  const STORAGE_KEY = 'vacationAlbum.v1';
+  const STORAGE_KEY = 'vacationAlbum.v2';
   const MAX_DIMENSION = 1600;
   const JPEG_QUALITY = 0.85;
 
-  const grid = document.getElementById('grid');
+  const pagesEl = document.getElementById('pages');
   const albumTitle = document.getElementById('albumTitle');
   const albumSubtitle = document.getElementById('albumSubtitle');
   const fileInput = document.getElementById('fileInput');
@@ -11,7 +11,10 @@
   const printBtn = document.getElementById('printBtn');
   const resetBtn = document.getElementById('resetBtn');
   const dropzone = document.getElementById('dropzone');
-  const cardTemplate = document.getElementById('cardTemplate');
+  const pageTemplate = document.getElementById('pageTemplate');
+  const captionsInput = document.getElementById('captionsInput');
+  const importCaptionsBtn = document.getElementById('importCaptionsBtn');
+  const exportManifestBtn = document.getElementById('exportManifestBtn');
 
   let state = loadState();
   let draggedId = null;
@@ -72,7 +75,7 @@
     for (const file of files) {
       try {
         const src = await resizeImage(file);
-        state.photos.push({ id: uid(), src, caption: '' });
+        state.photos.push({ id: uid(), src, caption: '', name: file.name });
       } catch (e) {
         console.warn('Skipped file', file.name, e);
       }
@@ -85,21 +88,23 @@
     albumTitle.value = state.title || '';
     albumSubtitle.value = state.subtitle || '';
 
-    grid.innerHTML = '';
-    for (const photo of state.photos) {
-      const node = cardTemplate.content.firstElementChild.cloneNode(true);
+    pagesEl.innerHTML = '';
+    state.photos.forEach((photo, index) => {
+      const node = pageTemplate.content.firstElementChild.cloneNode(true);
       node.dataset.id = photo.id;
-      const img = node.querySelector('.card-img');
+      const img = node.querySelector('.photo-img');
       img.src = photo.src;
-      const caption = node.querySelector('.card-caption');
+      const caption = node.querySelector('.photo-caption');
       caption.value = photo.caption || '';
+      node.querySelector('.page-number').dataset.page =
+        String(index + 2).padStart(2, '0') + ' / ' + String(state.photos.length + 1).padStart(2, '0');
 
       caption.addEventListener('input', () => {
         photo.caption = caption.value;
         saveState();
       });
 
-      node.querySelector('.card-remove').addEventListener('click', () => {
+      node.querySelector('.page-remove').addEventListener('click', () => {
         state.photos = state.photos.filter((p) => p.id !== photo.id);
         saveState();
         render();
@@ -120,13 +125,14 @@
       node.addEventListener('dragleave', () => node.classList.remove('drag-over'));
       node.addEventListener('drop', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         node.classList.remove('drag-over');
         if (!draggedId || draggedId === photo.id) return;
         reorder(draggedId, photo.id);
       });
 
-      grid.appendChild(node);
-    }
+      pagesEl.appendChild(node);
+    });
   }
 
   function reorder(draggedId, targetId) {
@@ -166,6 +172,66 @@
       render();
     }
   });
+
+  // ---- Captions manifest: lets an AI (or anyone) write captions offline ----
+  // and import them back in bulk, matched by original filename.
+
+  exportManifestBtn.addEventListener('click', () => {
+    const manifest = state.photos.map((p, i) => ({
+      order: i + 1,
+      filename: p.name || null,
+      caption: p.caption || '',
+    }));
+    const blob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'legendes-album.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  importCaptionsBtn.addEventListener('click', () => captionsInput.click());
+  captionsInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    captionsInput.value = '';
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      applyCaptions(data);
+    } catch (err) {
+      alert("Ce fichier de légendes n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un export JSON valide.");
+      console.warn(err);
+    }
+  });
+
+  function applyCaptions(data) {
+    const entries = Array.isArray(data)
+      ? data
+      : Object.entries(data).map(([filename, caption]) => ({ filename, caption }));
+
+    let matched = 0;
+    for (const entry of entries) {
+      if (!entry || !entry.caption) continue;
+      let target = null;
+      if (entry.filename) {
+        target = state.photos.find(
+          (p) => p.name && p.name.toLowerCase() === String(entry.filename).toLowerCase()
+        );
+      }
+      if (!target && entry.order) {
+        target = state.photos[entry.order - 1];
+      }
+      if (target) {
+        target.caption = entry.caption;
+        matched++;
+      }
+    }
+    saveState();
+    render();
+    alert(matched + ' légende(s) importée(s) sur ' + entries.length + '.');
+  }
 
   ['dragenter', 'dragover'].forEach((evt) => {
     dropzone.addEventListener(evt, (e) => {

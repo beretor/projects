@@ -4,47 +4,63 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Album Photo de Vacances</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Jost:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <header class="topbar no-print">
-  <div class="brand">📷 Album de vacances</div>
-  <div class="actions">
-    <button id="addPhotosBtn" class="btn btn-primary">+ Ajouter des photos</button>
+  <div class="wordmark">Album de vacances</div>
+  <nav class="actions">
+    <button id="addPhotosBtn" class="link-btn">Ajouter des photos</button>
     <input type="file" id="fileInput" accept="image/*" multiple hidden>
-    <button id="printBtn" class="btn">Exporter en PDF</button>
-    <button id="resetBtn" class="btn btn-danger">Réinitialiser</button>
-  </div>
+    <span class="sep">·</span>
+    <button id="importCaptionsBtn" class="link-btn">Importer légendes</button>
+    <input type="file" id="captionsInput" accept="application/json" hidden>
+    <span class="sep">·</span>
+    <button id="exportManifestBtn" class="link-btn">Exporter la liste des photos</button>
+    <span class="sep">·</span>
+    <button id="printBtn" class="link-btn">Imprimer le livre</button>
+    <span class="sep">·</span>
+    <button id="resetBtn" class="link-btn link-btn-danger">Réinitialiser</button>
+  </nav>
 </header>
 
-<main class="album" id="album">
+<p class="format-note no-print">Format carré 21&nbsp;×&nbsp;21&nbsp;cm · une photo par page, prêt pour l'impression.</p>
 
-  <section class="cover">
-    <input type="text" id="albumTitle" class="cover-title" placeholder="Titre de l'album (ex: Été en Grèce)" maxlength="60">
-    <input type="text" id="albumSubtitle" class="cover-subtitle" placeholder="Dates ou lieu (ex: Juillet 2026 · Cyclades)" maxlength="80">
+<main class="book" id="book">
+
+  <section class="page cover-page">
+    <div class="page-inner">
+      <input type="text" id="albumTitle" class="cover-title" placeholder="Titre de l'album" maxlength="60">
+      <div class="cover-rule" aria-hidden="true"></div>
+      <input type="text" id="albumSubtitle" class="cover-subtitle" placeholder="LIEU · DATES" maxlength="80">
+    </div>
   </section>
 
-  <section id="dropzone" class="dropzone">
+  <section id="dropzone" class="dropzone no-print">
     <p>Glissez-déposez vos photos ici, ou cliquez sur « Ajouter des photos »</p>
   </section>
 
-  <section id="grid" class="grid"></section>
+  <section id="pages" class="pages"></section>
 
-  <p id="emptyState" class="empty-state">Votre album est vide pour l'instant. Ajoutez vos plus beaux souvenirs de vacances !</p>
+  <p id="emptyState" class="empty-state no-print">Votre album est vide pour l'instant. Ajoutez vos plus beaux souvenirs de vacances.</p>
 
 </main>
 
-<template id="cardTemplate">
-  <figure class="card" draggable="true">
-    <button class="card-remove no-print" title="Supprimer">&times;</button>
-    <div class="card-img-wrap">
-      <img class="card-img" alt="">
+<template id="pageTemplate">
+  <article class="page photo-page" draggable="true">
+    <button class="page-remove no-print" title="Supprimer">&times;</button>
+    <div class="page-inner">
+      <div class="photo-frame">
+        <img class="photo-img" alt="">
+      </div>
+      <input type="text" class="photo-caption" placeholder="Ajouter une légende…" maxlength="140">
+      <div class="page-number" aria-hidden="true"></div>
     </div>
-    <figcaption>
-      <input type="text" class="card-caption" placeholder="Ajouter une légende..." maxlength="140">
-    </figcaption>
-  </figure>
+  </article>
 </template>
 
 <script src="app.js"></script>
